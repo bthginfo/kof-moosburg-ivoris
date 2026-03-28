@@ -197,16 +197,78 @@ preisrechnerRouter.get('/behandlungen', (_req, res) => {
   res.json(behandlungen);
 });
 
-// GET /api/preisrechner/kassenarten – verfügbare Kassenarten
+// GET /api/preisrechner/kassenarten – verfügbare Kassenarten mit konkreten Namen
 preisrechnerRouter.get('/kassenarten', async (_req, res) => {
+  // Jede Kasse wird auf ihre KZVB-Kassenart (Abrechnungsgruppe) gemapped,
+  // da die Punktwerte pro Gruppe gelten, nicht pro Einzelkasse.
   const KASSENARTEN = [
-    { id: '1', label: 'AOK' },
-    { id: '2', label: 'BKK (Betriebskrankenkasse)' },
-    { id: '3', label: 'IKK (Innungskrankenkasse)' },
-    { id: '4', label: 'LKK (Landwirtschaftliche KK)' },
-    { id: '6', label: 'Knappschaft' },
-    { id: '8', label: 'Ersatzkasse (TK, Barmer, DAK...)' },
-    { id: '9', label: 'Sonstige (SOKO)' },
+    // Kassenart 1 – AOK
+    { id: '1', label: 'AOK Bayern', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Baden-Württemberg', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Niedersachsen', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Nordost', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Nordwest', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Plus (Sachsen/Thüringen)', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Rheinland/Hamburg', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Rheinland-Pfalz/Saarland', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Sachsen-Anhalt', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Hessen', gruppe: 'AOK' },
+    { id: '1', label: 'AOK Bremen/Bremerhaven', gruppe: 'AOK' },
+    // Kassenart 2 – BKK
+    { id: '2', label: 'BKK Mobil Oil', gruppe: 'BKK' },
+    { id: '2', label: 'BKK VBU', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Pronova', gruppe: 'BKK' },
+    { id: '2', label: 'BKK firmus', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Gildemeister Seidensticker', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Linde', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Pfalz', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Scheufelen', gruppe: 'BKK' },
+    { id: '2', label: 'BKK Technoform', gruppe: 'BKK' },
+    { id: '2', label: 'BKK ZF & Partner', gruppe: 'BKK' },
+    { id: '2', label: 'Audi BKK', gruppe: 'BKK' },
+    { id: '2', label: 'BMW BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Bosch BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Continental BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Daimler BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Die Schwenninger BKK', gruppe: 'BKK' },
+    { id: '2', label: 'energie BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Heimat Krankenkasse', gruppe: 'BKK' },
+    { id: '2', label: 'Novitas BKK', gruppe: 'BKK' },
+    { id: '2', label: 'R+V BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Salus BKK', gruppe: 'BKK' },
+    { id: '2', label: 'SBK (Siemens BKK)', gruppe: 'BKK' },
+    { id: '2', label: 'Viactiv Krankenkasse', gruppe: 'BKK' },
+    { id: '2', label: 'vivida BKK', gruppe: 'BKK' },
+    { id: '2', label: 'WMF BKK', gruppe: 'BKK' },
+    { id: '2', label: 'Andere BKK', gruppe: 'BKK' },
+    // Kassenart 3 – IKK
+    { id: '3', label: 'IKK classic', gruppe: 'IKK' },
+    { id: '3', label: 'IKK Südwest', gruppe: 'IKK' },
+    { id: '3', label: 'IKK gesund plus', gruppe: 'IKK' },
+    { id: '3', label: 'IKK Brandenburg und Berlin', gruppe: 'IKK' },
+    // Kassenart 4 – LKK
+    { id: '4', label: 'SVLFG (Landwirtschaftliche KK)', gruppe: 'LKK' },
+    // Kassenart 6 – Knappschaft
+    { id: '6', label: 'Knappschaft', gruppe: 'Knappschaft' },
+    // Kassenart 8 – Ersatzkassen
+    { id: '8', label: 'Techniker Krankenkasse (TK)', gruppe: 'Ersatzkasse' },
+    { id: '8', label: 'BARMER', gruppe: 'Ersatzkasse' },
+    { id: '8', label: 'DAK-Gesundheit', gruppe: 'Ersatzkasse' },
+    { id: '8', label: 'KKH Kaufmännische Krankenkasse', gruppe: 'Ersatzkasse' },
+    { id: '8', label: 'HEK – Hanseatische Krankenkasse', gruppe: 'Ersatzkasse' },
+    { id: '8', label: 'hkk Krankenkasse', gruppe: 'Ersatzkasse' },
+    // Kassenart 9 – Sonstige
+    { id: '9', label: 'BAHN-BKK', gruppe: 'Sonstige' },
+    { id: '9', label: 'BKK Dachverband', gruppe: 'Sonstige' },
+    { id: '9', label: 'Andere gesetzliche Krankenkasse', gruppe: 'Sonstige' },
   ];
-  res.json(KASSENARTEN);
+
+  // Gruppiert nach Kategorie zurückgeben
+  const grouped = {};
+  for (const k of KASSENARTEN) {
+    if (!grouped[k.gruppe]) grouped[k.gruppe] = [];
+    grouped[k.gruppe].push({ id: k.id, label: k.label });
+  }
+
+  res.json({ flat: KASSENARTEN, grouped });
 });

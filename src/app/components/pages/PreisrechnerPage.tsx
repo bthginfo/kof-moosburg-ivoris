@@ -12,6 +12,10 @@ interface Kassenart {
   label: string;
 }
 
+interface KassenartenGrouped {
+  [gruppe: string]: Kassenart[];
+}
+
 interface Ergebnis {
   behandlung: string;
   versicherungsart: string;
@@ -37,7 +41,7 @@ interface Ergebnis {
 
 export function PreisrechnerPage() {
   const [behandlungen, setBehandlungen] = useState<Behandlung[]>([]);
-  const [kassenarten, setKassenarten] = useState<Kassenart[]>([]);
+  const [kassenarten, setKassenarten] = useState<KassenartenGrouped>({});
   const [versicherungsart, setVersicherungsart] = useState("");
   const [kassenart, setKassenart] = useState("");
   const [behandlungsart, setBehandlungsart] = useState("");
@@ -57,7 +61,7 @@ export function PreisrechnerPage() {
 
   useEffect(() => {
     api.getBehandlungen().then(setBehandlungen).catch(() => {});
-    api.getKassenarten().then(setKassenarten).catch(() => {});
+    api.getKassenarten().then((data: { grouped: KassenartenGrouped }) => setKassenarten(data.grouped)).catch(() => {});
   }, []);
 
   const berechnen = async () => {
@@ -161,8 +165,12 @@ export function PreisrechnerPage() {
                   className="w-full py-3 px-4 rounded-xl border-2 border-border bg-input-background text-foreground focus:border-accent focus:outline-none"
                 >
                   <option value="">Bitte wählen...</option>
-                  {kassenarten.map((k) => (
-                    <option key={k.id} value={k.id}>{k.label}</option>
+                  {Object.entries(kassenarten).map(([gruppe, kassen]) => (
+                    <optgroup key={gruppe} label={gruppe}>
+                      {kassen.map((k, i) => (
+                        <option key={`${k.id}-${i}`} value={k.id}>{k.label}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>
