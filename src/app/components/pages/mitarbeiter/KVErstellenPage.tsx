@@ -227,11 +227,11 @@ export function KVErstellenPage() {
 
   const gesamtPunkte = positionen.reduce((sum, p) => sum + p.punkte * p.anzahl, 0);
 
-  const SOURCE_TABS: { key: PatientSource; label: string; icon: string }[] = [
-    { key: 'manuell', label: 'Manuell', icon: '✏️' },
-    { key: 'patient', label: 'Bestandspatient', icon: '👤' },
-    { key: 'anfrage', label: 'Aus Anfrage', icon: '📩' },
-    { key: 'ivoris', label: 'Aus Ivoris', icon: '🦷' },
+  const SOURCE_TABS: { key: PatientSource; label: string; desc: string; iconPath: string; color: string }[] = [
+    { key: 'manuell', label: 'Manuell', desc: 'Daten selbst eingeben', color: 'text-[#063255] bg-[#063255]/10', iconPath: 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z' },
+    { key: 'patient', label: 'Bestandspatient', desc: 'Aus Patientenstamm', color: 'text-violet-600 bg-violet-500/10', iconPath: 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z' },
+    { key: 'anfrage', label: 'Aus Anfrage', desc: 'Patientenanfrage nutzen', color: 'text-[#f58a07] bg-[#f58a07]/10', iconPath: 'M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51l-4.66-2.51m0 0l-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0l-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z' },
+    { key: 'ivoris', label: 'Aus Ivoris', desc: 'Ivoris-Daten laden', color: 'text-emerald-600 bg-emerald-500/10', iconPath: 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75' },
   ];
 
   return (
@@ -241,16 +241,23 @@ export function KVErstellenPage() {
       {/* ── Source Selection ── */}
       <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-foreground mb-3">Patientendaten-Quelle</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           {SOURCE_TABS.map(tab => (
             <button key={tab.key} onClick={() => changeSource(tab.key)}
-              className={`p-3 rounded-xl border text-sm font-medium transition-colors text-left ${
+              className={`flex items-center gap-3 p-4 rounded-2xl border text-left transition-all ${
                 source === tab.key
-                  ? 'bg-[#063255] text-white border-[#063255]'
-                  : 'bg-card hover:bg-muted/50 text-foreground border-border'
+                  ? 'bg-white border-[#063255]/30 shadow-md ring-2 ring-[#063255]/20'
+                  : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'
               }`}>
-              <span className="text-base">{tab.icon}</span>
-              <p className="mt-1">{tab.label}</p>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${tab.color}`}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d={tab.iconPath} />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <p className={`font-semibold text-sm ${source === tab.key ? 'text-[#063255]' : 'text-gray-700'}`}>{tab.label}</p>
+                <p className="text-[11px] text-gray-400 leading-tight hidden sm:block">{tab.desc}</p>
+              </div>
             </button>
           ))}
         </div>
