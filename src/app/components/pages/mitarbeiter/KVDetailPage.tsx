@@ -128,6 +128,15 @@ export function KVDetailPage() {
     load();
   };
 
+  const openPdf = async () => {
+    if (!kv) return;
+    try {
+      await api.openKVPdf(kv.id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'PDF konnte nicht geöffnet werden.');
+    }
+  };
+
   if (loading) return <p className="text-muted-foreground">Laden...</p>;
   if (!kv) return <p className="text-destructive">KV nicht gefunden.</p>;
 
@@ -158,10 +167,10 @@ export function KVDetailPage() {
             className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 flex-1 sm:flex-none text-center">
             Bearbeiten
           </Link>
-          <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer"
+          <button onClick={openPdf}
             className="bg-accent text-accent-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-accent/90 flex-1 sm:flex-none text-center">
             PDF
-          </a>
+          </button>
           <button onClick={openSignModal}
             className="bg-[#063255] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#063255]/90 flex items-center justify-center gap-1.5 w-full sm:w-auto">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

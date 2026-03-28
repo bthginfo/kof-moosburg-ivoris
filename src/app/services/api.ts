@@ -141,9 +141,26 @@ export const api = {
     return res.json();
   },
 
-  getKVPdfUrl(id: number) {
-    const token = localStorage.getItem('kfo_token');
-    return `${API_BASE}/api/kostenvoranschlaege/${id}/pdf?token=${token}`;
+  async openKVPdf(id: number) {
+    const res = await request(`/api/kostenvoranschlaege/${id}/pdf`, {
+      method: 'GET',
+      headers: { Accept: 'application/pdf' },
+    });
+    if (!res.ok) {
+      let message = 'PDF konnte nicht geladen werden';
+      try {
+        const data = await res.json();
+        message = data.error || message;
+      } catch {
+        // Ignore JSON parse error for non-JSON responses.
+      }
+      throw new Error(message);
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   },
 
   async updateKVStatus(id: number, status: string) {

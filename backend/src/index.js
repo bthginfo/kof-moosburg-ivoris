@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import cron from 'node-cron';
 import { authRouter } from './routes/auth.js';
 import { punktwerteRouter } from './routes/punktwerte.js';
@@ -17,6 +18,14 @@ import { query } from './db/pool.js';
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: false,
+}));
+
 app.use(cors({
   origin: (origin, callback) => {
     const allowed = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map(s => s.trim());
@@ -30,6 +39,13 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+
+// Sensitive API responses should not be cached by browsers or intermediate proxies.
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
+  next();
+});
 
 // Health check – also warms up DB connection for fast login
 app.get('/api/health', async (_req, res) => {

@@ -1,13 +1,24 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
+import rateLimit from 'express-rate-limit';
 import { query } from '../db/pool.js';
 import { signToken, authenticateToken } from '../middleware/auth.js';
 
 export const authRouter = Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Zu viele Login-Versuche. Bitte in 15 Minuten erneut versuchen.' },
+});
+
 // POST /api/auth/login
-authRouter.post('/login', async (req, res) => {
+authRouter.post('/login', loginLimiter, async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'E-Mail und Passwort erforderlich' });
@@ -40,5 +51,7 @@ authRouter.post('/login', async (req, res) => {
 
 // GET /api/auth/me – verify token and return user info
 authRouter.get('/me', authenticateToken, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Pragma', 'no-cache');
   res.json({ user: req.user });
 });

@@ -29,8 +29,13 @@ async function seed() {
   console.log('Seeding database...');
 
   // Admin user
-  const email = process.env.ADMIN_EMAIL || 'admin@kfo-moosburg.de';
-  const password = process.env.ADMIN_PASSWORD || 'changeme123';
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    throw new Error('ADMIN_EMAIL und ADMIN_PASSWORD müssen gesetzt sein. Keine Default-Zugangsdaten erlaubt.');
+  }
+
   const hash = await bcrypt.hash(password, 10);
 
   await query(

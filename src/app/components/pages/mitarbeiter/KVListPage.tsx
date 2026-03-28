@@ -42,6 +42,14 @@ export function KVListPage() {
     load();
   };
 
+  const openPdf = async (id: number) => {
+    try {
+      await api.openKVPdf(id);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'PDF konnte nicht geöffnet werden.');
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -83,7 +91,7 @@ export function KVListPage() {
                   </div>
                   <div className="flex gap-3 shrink-0">
                     <Link to={`/mitarbeiter/kv/${kv.id}`} className="text-primary hover:underline text-sm">Details</Link>
-                    <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm">PDF</a>
+                    <button onClick={() => openPdf(kv.id)} className="text-accent hover:underline text-sm">PDF</button>
                   </div>
                 </div>
               </div>
@@ -132,10 +140,10 @@ export function KVListPage() {
                         className="text-primary hover:underline text-xs">
                         Details
                       </Link>
-                      <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer"
+                      <button onClick={() => openPdf(kv.id)}
                         className="text-accent hover:underline text-xs">
                         PDF
-                      </a>
+                      </button>
                     </td>
                   </tr>
                 ))}
