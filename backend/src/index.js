@@ -12,6 +12,7 @@ import { csvImportRouter } from './routes/csvImport.js';
 import { importPunktwerte } from './services/kzvbImport.js';
 import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
+import { query } from './db/pool.js';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -30,9 +31,14 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Health check – also warms up DB connection for fast login
+app.get('/api/health', async (_req, res) => {
+  try {
+    await query('SELECT 1');
+    res.json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() });
+  } catch {
+    res.json({ status: 'ok', db: 'cold', timestamp: new Date().toISOString() });
+  }
 });
 
 // Public routes

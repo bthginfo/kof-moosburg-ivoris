@@ -9,27 +9,35 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [serverReady, setServerReady] = useState(false);
+  const [warmingUp, setWarmingUp] = useState(false);
   const navigate = useNavigate();
 
-  // Warm-up: Server aufwecken sobald Login-Seite geladen wird
+  // Warm-up: Backend + DB-Verbindung vor Login vorbereiten
   useEffect(() => {
+    setWarmingUp(true);
     fetch(`${API_BASE}/api/health`)
-      .then(() => setServerReady(true))
-      .catch(() => {
-        // Retry nach 3 Sek.
-        setTimeout(() => {
-          fetch(`${API_BASE}/api/health`)
-            .then(() => setServerReady(true))
-            .catch(() => setServerReady(true)); // trotzdem freigeben
-        }, 3000);
-      });
+      .catch(() => {})
+      .finally(() => setWarmingUp(false));
   }, []);
+
+  const warmupServer = () => {
+    fetch(`${API_BASE}/api/health`)
+      .catch(() => {
+        // Retry nach 1.5 Sek., ohne den Login zu blockieren
+        setTimeout(() => {
+          fetch(`${API_BASE}/api/health`).catch(() => {});
+        }, 1500);
+      });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // Start warm-up parallel, Login läuft sofort weiter
+    warmupServer();
+
     try {
       await api.login(email, password);
       navigate("/mitarbeiter");
@@ -78,13 +86,13 @@ export function LoginPage() {
               <div className="p-3 bg-destructive/10 text-destructive rounded-xl text-sm">{error}</div>
             )}
 
-            {!serverReady && (
+            {warmingUp && (
               <div className="p-3 bg-accent/10 text-accent rounded-xl text-sm flex items-center gap-2">
                 <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" className="opacity-25" />
                   <path d="M4 12a8 8 0 018-8" className="opacity-75" />
                 </svg>
-                Server wird gestartet, bitte kurz warten...
+                Verbindung wird vorbereitet...
               </div>
             )}
 

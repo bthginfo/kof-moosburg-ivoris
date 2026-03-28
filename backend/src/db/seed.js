@@ -31,7 +31,7 @@ async function seed() {
   // Admin user
   const email = process.env.ADMIN_EMAIL || 'admin@kfo-moosburg.de';
   const password = process.env.ADMIN_PASSWORD || 'changeme123';
-  const hash = await bcrypt.hash(password, 12);
+  const hash = await bcrypt.hash(password, 10);
 
   await query(
     `INSERT INTO users (email, password_hash, name, role)

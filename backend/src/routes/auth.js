@@ -20,6 +20,13 @@ authRouter.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Ungültige Anmeldedaten' });
     }
 
+    // Re-hash with lower cost if old hash used higher rounds
+    const rounds = bcrypt.getRounds(user.password_hash);
+    if (rounds > 10) {
+      const newHash = await bcrypt.hash(password, 10);
+      await query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, user.id]);
+    }
+
     const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
     res.json({
       token,
