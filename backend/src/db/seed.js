@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { query } from './pool.js';
 
 // BEMA KFO Leistungskatalog – die gängigsten KFO-Positionen
