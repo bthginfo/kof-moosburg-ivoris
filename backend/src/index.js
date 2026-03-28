@@ -9,6 +9,8 @@ import { preisrechnerRouter } from './routes/preisrechner.js';
 import { kostenvoranschlaegeRouter } from './routes/kostenvoranschlaege.js';
 import { anfragenRouter } from './routes/anfragen.js';
 import { importPunktwerte } from './services/kzvbImport.js';
+import { migrate } from './db/migrate.js';
+import { seed } from './db/seed.js';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -45,6 +47,18 @@ cron.schedule('0 8 5 1,4,7,10 *', async () => {
   }
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`KFO Moosburg Backend läuft auf Port ${PORT}`);
+  try {
+    await migrate();
+    await seed();
+    console.log('DB migration & seed complete.');
+  } catch (err) {
+    console.error('DB init error (non-fatal):', err.message);
+  }
+  try {
+    await importPunktwerte();
+  } catch (err) {
+    console.error('KZVB import skipped:', err.message);
+  }
 });

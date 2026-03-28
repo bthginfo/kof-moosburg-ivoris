@@ -53,10 +53,14 @@ async function seed() {
   console.log(`${LEISTUNGEN.length} BEMA-Leistungen seeded.`);
 
   console.log('Seed complete.');
-  process.exit(0);
 }
 
-seed().catch(err => {
-  console.error('Seed failed:', err);
-  process.exit(1);
-});
+export { seed };
+
+// CLI mode
+if (process.argv[1]?.endsWith('seed.js')) {
+  seed().then(() => process.exit(0)).catch(err => {
+    console.error('Seed failed:', err);
+    process.exit(1);
+  });
+}

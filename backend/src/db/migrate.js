@@ -89,10 +89,14 @@ async function migrate() {
   console.log('Running migrations...');
   await query(SQL);
   console.log('Migrations complete.');
-  process.exit(0);
 }
 
-migrate().catch(err => {
-  console.error('Migration failed:', err);
-  process.exit(1);
-});
+export { migrate };
+
+// CLI mode
+if (process.argv[1]?.endsWith('migrate.js')) {
+  migrate().then(() => process.exit(0)).catch(err => {
+    console.error('Migration failed:', err);
+    process.exit(1);
+  });
+}
