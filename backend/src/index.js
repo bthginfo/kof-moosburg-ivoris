@@ -11,7 +11,7 @@ import { anfragenRouter } from './routes/anfragen.js';
 import { importPunktwerte } from './services/kzvbImport.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
