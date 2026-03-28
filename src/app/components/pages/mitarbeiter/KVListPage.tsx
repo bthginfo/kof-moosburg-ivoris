@@ -17,9 +17,9 @@ interface KV {
 const STATUS_OPTIONS = ['entwurf', 'gesendet', 'angenommen', 'abgelehnt'] as const;
 
 const STATUS_COLORS: Record<string, string> = {
-  entwurf: 'bg-yellow-100 text-yellow-700',
+  entwurf: 'bg-amber-100 text-amber-700',
   gesendet: 'bg-blue-100 text-blue-700',
-  angenommen: 'bg-green-100 text-green-700',
+  angenommen: 'bg-emerald-100 text-emerald-700',
   abgelehnt: 'bg-red-100 text-red-600',
 };
 
@@ -45,23 +45,23 @@ export function KVListPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">Kostenvoranschläge</h1>
+        <div><h1 className="text-2xl font-bold text-[#063255]">Kostenvoranschläge</h1><p className="text-sm text-gray-500 mt-0.5">Alle erstellten KVs im Überblick</p></div>
         <a href="/mitarbeiter/kv-erstellen"
-          className="bg-accent text-accent-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-accent/90 transition-colors">
-          + Neuer KV
+          className="inline-flex items-center gap-2 bg-[#f58a07] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#e07d06] transition-colors shadow-sm">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg> Neuer KV
         </a>
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground">Laden...</p>
+        <div className="flex items-center justify-center py-12"><div className="w-6 h-6 border-2 border-[#063255] border-t-transparent rounded-full animate-spin" /></div>
       ) : kvs.length === 0 ? (
-        <p className="text-muted-foreground">Noch keine Kostenvoranschläge erstellt.</p>
+        <div className="text-center py-12 text-gray-400"><p className="text-sm">Noch keine Kostenvoranschläge erstellt.</p></div>
       ) : (
         <>
           {/* Mobile: Cards */}
           <div className="md:hidden space-y-3">
             {kvs.map((kv) => (
-              <div key={kv.id} className="bg-card border rounded-xl p-4">
+              <div key={kv.id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-sm text-muted-foreground">KV-{kv.id}</span>
                   <select
@@ -91,10 +91,10 @@ export function KVListPage() {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block bg-card border rounded-xl overflow-hidden">
+          <div className="hidden md:block bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
+                <tr className="border-b border-gray-100 bg-gray-50/80 text-gray-500 text-left">
                   <th className="px-4 py-3">Nr.</th>
                   <th className="px-4 py-3">Patient</th>
                   <th className="px-4 py-3">Vers.</th>
@@ -107,7 +107,7 @@ export function KVListPage() {
               </thead>
               <tbody>
                 {kvs.map((kv) => (
-                  <tr key={kv.id} className="border-b hover:bg-secondary/20">
+                  <tr key={kv.id} className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
                     <td className="px-4 py-3 font-mono">KV-{kv.id}</td>
                     <td className="px-4 py-3 font-medium">{kv.patient_name}</td>
                     <td className="px-4 py-3">{kv.versicherungsart}</td>
