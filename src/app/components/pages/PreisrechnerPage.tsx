@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../../services/api";
+import { SearchableSelect } from "../ui/SearchableSelect";
 
 interface Behandlung {
   id: string;
@@ -75,7 +76,7 @@ export function PreisrechnerPage() {
     try {
       const data = await api.berechnePreis({
         versicherungsart,
-        kassenart: versicherungsart === "GKV" ? kassenart : undefined,
+        kassenart: versicherungsart === "GKV" ? kassenart.split("::")[0] : undefined,
         behandlungsart,
         kig_stufe: versicherungsart === "GKV" ? kigStufe : undefined,
       });
@@ -98,7 +99,7 @@ export function PreisrechnerPage() {
         email,
         telefon,
         versicherungsart,
-        kassenart,
+        kassenart: kassenart.split("::")[0],
         behandlungsart,
         kig_stufe: kigStufe,
         geschaetzte_kosten_min: ergebnis?.geschaetzte_kosten_min,
@@ -159,20 +160,16 @@ export function PreisrechnerPage() {
                 <label className="block text-sm font-semibold text-foreground mb-2">
                   Krankenkasse
                 </label>
-                <select
+                <SearchableSelect
+                  options={Object.entries(kassenarten).flatMap(([gruppe, kassen]) =>
+                    kassen.map((k) => ({ value: k.id, label: k.label, gruppe }))
+                  )}
                   value={kassenart}
-                  onChange={(e) => setKassenart(e.target.value)}
-                  className="w-full py-3 px-4 rounded-xl border-2 border-border bg-input-background text-foreground focus:border-accent focus:outline-none"
-                >
-                  <option value="">Bitte wählen...</option>
-                  {Object.entries(kassenarten).map(([gruppe, kassen]) => (
-                    <optgroup key={gruppe} label={gruppe}>
-                      {kassen.map((k, i) => (
-                        <option key={`${k.id}-${i}`} value={k.id}>{k.label}</option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                  onChange={setKassenart}
+                  placeholder="Krankenkasse suchen..."
+                  searchPlaceholder="z.B. TK, AOK, Barmer..."
+                  emptyText="Keine Krankenkasse gefunden."
+                />
               </div>
             )}
 
