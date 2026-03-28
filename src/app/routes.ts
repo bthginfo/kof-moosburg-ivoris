@@ -14,6 +14,7 @@ import { KVEditPage } from "./components/pages/mitarbeiter/KVEditPage";
 import { PunktwertePage } from "./components/pages/mitarbeiter/PunktwertePage";
 import { LeistungenPage } from "./components/pages/mitarbeiter/LeistungenPage";
 import { CsvImportPage } from "./components/pages/mitarbeiter/CsvImportPage";
+import { PatientenPage } from "./components/pages/mitarbeiter/PatientenPage";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { path: "punktwerte", Component: PunktwertePage },
       { path: "leistungen", Component: LeistungenPage },
       { path: "csv-import", Component: CsvImportPage },
+      { path: "patienten", Component: PatientenPage },
     ],
   },
 ]);

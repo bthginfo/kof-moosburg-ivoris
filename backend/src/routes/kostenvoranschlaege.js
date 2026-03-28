@@ -107,74 +107,179 @@ kostenvoranschlaegeRouter.get('/:id/pdf', async (req, res) => {
     const kv = result.rows[0];
     if (!kv) return res.status(404).json({ error: 'KV nicht gefunden' });
 
-    const doc = new PDFDocument({ size: 'A4', margin: 50 });
+    // Ersteller-Name laden
+    let erstellerName = '';
+    if (kv.erstellt_von) {
+      const userRes = await query('SELECT name FROM users WHERE id = $1', [kv.erstellt_von]);
+      erstellerName = userRes.rows[0]?.name || '';
+    }
+
+    const doc = new PDFDocument({ size: 'A4', margins: { top: 40, bottom: 40, left: 50, right: 50 } });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename=KV-${kv.id}.pdf`);
     doc.pipe(res);
 
-    // Header
-    doc.fontSize(20).text('KFO Praxis Moosburg', { align: 'center' });
-    doc.fontSize(10).text('Kostenvoranschlag', { align: 'center' });
-    doc.moveDown(2);
+    const PRIMARY = '#063255';
+    const ACCENT = '#f58a07';
+    const LIGHT_BG = '#edf7ff';
+    const GRAY = '#6b7280';
+    const pageWidth = 495; // 595 - 50 - 50
 
-    // Patient info
-    doc.fontSize(12).text(`Patient: ${kv.patient_name}`);
+    // ── Header Bar ──
+    doc.rect(0, 0, 595, 90).fill(PRIMARY);
+
+    // Praxis-Name
+    doc.fontSize(22).font('Helvetica-Bold').fillColor('#ffffff');
+    doc.text('KFO Praxis Moosburg', 50, 22, { width: 300 });
+    doc.fontSize(10).font('Helvetica').fillColor('#ffffff');
+    doc.text('Dr. Amann & Dr. Burg · Kieferorthopädie', 50, 50);
+
+    // KV-Badge rechts
+    doc.fontSize(9).font('Helvetica-Bold').fillColor(ACCENT);
+    doc.text(`KV-${kv.id}`, 400, 25, { width: 145, align: 'right' });
+    doc.fontSize(8).font('Helvetica').fillColor('#ffffff');
+    doc.text(`Erstellt: ${new Date(kv.created_at).toLocaleDateString('de-DE')}`, 400, 40, { width: 145, align: 'right' });
+    doc.text(`Quartal: ${kv.quartal}`, 400, 52, { width: 145, align: 'right' });
+    const statusLabel = { entwurf: 'Entwurf', gesendet: 'Gesendet', angenommen: 'Angenommen', abgelehnt: 'Abgelehnt' };
+    doc.text(`Status: ${statusLabel[kv.status] || kv.status}`, 400, 64, { width: 145, align: 'right' });
+
+    // ── Accent line ──
+    doc.rect(0, 90, 595, 4).fill(ACCENT);
+
+    // ── KOSTENVORANSCHLAG Title ──
+    doc.fillColor(PRIMARY).fontSize(16).font('Helvetica-Bold');
+    doc.text('Kostenvoranschlag', 50, 110);
+
+    // ── Accent underline ──
+    doc.rect(50, 130, 80, 2.5).fill(ACCENT);
+
+    // ── Patient Info Box ──
+    const boxTop = 145;
+    doc.roundedRect(50, boxTop, pageWidth, 80, 6).fill(LIGHT_BG);
+
+    doc.fillColor(PRIMARY).fontSize(9).font('Helvetica-Bold');
+    doc.text('Patientendaten', 62, boxTop + 10);
+
+    doc.fontSize(9).font('Helvetica').fillColor('#374151');
+    const col1 = 62;
+    const col2 = 300;
+    let infoY = boxTop + 26;
+
+    doc.font('Helvetica-Bold').text('Patient:', col1, infoY, { continued: true }).font('Helvetica').text(` ${kv.patient_name}`);
     if (kv.patient_geburtsdatum) {
-      doc.text(`Geburtsdatum: ${new Date(kv.patient_geburtsdatum).toLocaleDateString('de-DE')}`);
+      doc.font('Helvetica-Bold').text('Geb.:', col2, infoY, { continued: true }).font('Helvetica').text(` ${new Date(kv.patient_geburtsdatum).toLocaleDateString('de-DE')}`);
     }
-    doc.text(`Versicherung: ${kv.versicherungsart}${kv.kassenart ? ` (Kassenart ${kv.kassenart})` : ''}`);
-    if (kv.kig_stufe) doc.text(`KIG-Stufe: ${kv.kig_stufe}`);
-    doc.text(`Quartal: ${kv.quartal}`);
-    doc.text(`Datum: ${new Date(kv.created_at).toLocaleDateString('de-DE')}`);
+    infoY += 15;
+    doc.font('Helvetica-Bold').text('Versicherung:', col1, infoY, { continued: true }).font('Helvetica').text(` ${kv.versicherungsart}${kv.kassenart ? ` (Kassenart ${kv.kassenart})` : ''}`);
+    if (kv.kig_stufe) {
+      doc.font('Helvetica-Bold').text('KIG-Stufe:', col2, infoY, { continued: true }).font('Helvetica').text(` ${kv.kig_stufe}`);
+    }
     if (kv.diagnose) {
-      doc.moveDown(0.5);
-      doc.text(`Diagnose: ${kv.diagnose}`);
+      infoY += 15;
+      doc.font('Helvetica-Bold').text('Diagnose:', col1, infoY, { continued: true }).font('Helvetica').text(` ${kv.diagnose}`);
     }
-    doc.moveDown(1);
+
+    // ── Positions Table ──
+    let tableTop = boxTop + 95;
+
+    doc.fillColor(PRIMARY).fontSize(10).font('Helvetica-Bold');
+    doc.text('Leistungspositionen', 50, tableTop);
+    tableTop += 18;
 
     // Table header
-    doc.fontSize(10).font('Helvetica-Bold');
-    const tableTop = doc.y;
-    doc.text('BEMA-Nr.', 50, tableTop, { width: 60 });
-    doc.text('Bezeichnung', 115, tableTop, { width: 220 });
-    doc.text('Pkt.', 340, tableTop, { width: 40, align: 'right' });
-    doc.text('Anz.', 385, tableTop, { width: 35, align: 'right' });
-    doc.text('Summe Pkt.', 425, tableTop, { width: 60, align: 'right' });
-    doc.text('EUR', 490, tableTop, { width: 55, align: 'right' });
-    doc.moveDown(0.5);
-    doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-    doc.moveDown(0.3);
+    doc.rect(50, tableTop, pageWidth, 22).fill(PRIMARY);
+    doc.fillColor('#ffffff').fontSize(8).font('Helvetica-Bold');
+    const cols = { nr: 58, bez: 120, pkt: 320, anz: 370, sum: 415, eur: 475 };
+    doc.text('BEMA-Nr.', cols.nr, tableTop + 6);
+    doc.text('Bezeichnung', cols.bez, tableTop + 6);
+    doc.text('Punkte', cols.pkt, tableTop + 6, { width: 40, align: 'right' });
+    doc.text('Anz.', cols.anz, tableTop + 6, { width: 35, align: 'right' });
+    doc.text('Ges. Pkt.', cols.sum, tableTop + 6, { width: 50, align: 'right' });
+    doc.text('EUR', cols.eur, tableTop + 6, { width: 62, align: 'right' });
+    tableTop += 22;
 
-    // Positionen
-    doc.font('Helvetica');
+    // Table rows
     const positionen = typeof kv.positionen === 'string' ? JSON.parse(kv.positionen) : kv.positionen;
-    for (const pos of positionen) {
-      const y = doc.y;
-      doc.text(pos.bema_nr, 50, y, { width: 60 });
-      doc.text(pos.bezeichnung, 115, y, { width: 220 });
-      doc.text(String(pos.punkte_einzeln), 340, y, { width: 40, align: 'right' });
-      doc.text(String(pos.anzahl), 385, y, { width: 35, align: 'right' });
-      doc.text(String(pos.punkte_gesamt), 425, y, { width: 60, align: 'right' });
-      doc.text(`${pos.euro.toFixed(2)}`, 490, y, { width: 55, align: 'right' });
-      doc.moveDown(0.5);
+    doc.font('Helvetica').fontSize(8).fillColor('#374151');
+
+    for (let i = 0; i < positionen.length; i++) {
+      const pos = positionen[i];
+      const rowY = tableTop + (i * 20);
+
+      // Alternating row background
+      if (i % 2 === 0) {
+        doc.rect(50, rowY - 2, pageWidth, 20).fill('#f8fafc');
+        doc.fillColor('#374151');
+      }
+
+      // Page break check
+      if (rowY > 680) {
+        doc.addPage();
+        tableTop = 50 - (i * 20);
+      }
+
+      doc.text(pos.bema_nr, cols.nr, rowY + 4);
+      doc.text(pos.bezeichnung, cols.bez, rowY + 4, { width: 195 });
+      doc.text(String(pos.punkte_einzeln), cols.pkt, rowY + 4, { width: 40, align: 'right' });
+      doc.text(`${pos.anzahl}×`, cols.anz, rowY + 4, { width: 35, align: 'right' });
+      doc.text(String(pos.punkte_gesamt), cols.sum, rowY + 4, { width: 50, align: 'right' });
+      doc.text(`${pos.euro.toFixed(2)} €`, cols.eur, rowY + 4, { width: 62, align: 'right' });
     }
 
-    // Summen
-    doc.moveDown(0.5);
-    doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-    doc.moveDown(0.5);
-    doc.font('Helvetica-Bold');
-    doc.text(`Gesamtsumme: ${parseFloat(kv.summe_euro).toFixed(2)} EUR`, { align: 'right' });
+    const afterTable = tableTop + (positionen.length * 20) + 4;
+
+    // ── Divider line ──
+    doc.moveTo(50, afterTable).lineTo(50 + pageWidth, afterTable).lineWidth(1).strokeColor(PRIMARY).stroke();
+
+    // ── Summary Box ──
+    const summaryTop = afterTable + 12;
+    const summaryWidth = 220;
+    const summaryX = 50 + pageWidth - summaryWidth;
+
+    doc.fontSize(9).font('Helvetica').fillColor(GRAY);
+    doc.text('Gesamtsumme:', summaryX, summaryTop, { width: summaryWidth - 90 });
+    doc.font('Helvetica-Bold').fillColor('#374151');
+    doc.text(`${parseFloat(kv.summe_euro).toFixed(2)} €`, summaryX + summaryWidth - 90, summaryTop, { width: 90, align: 'right' });
+
+    let sumY = summaryTop;
     if (parseFloat(kv.kassenanteil) > 0) {
-      doc.text(`Kassenanteil (ca. 80%): -${parseFloat(kv.kassenanteil).toFixed(2)} EUR`, { align: 'right' });
+      sumY += 16;
+      doc.font('Helvetica').fillColor(GRAY);
+      doc.text('Kassenanteil (ca. 80%):', summaryX, sumY, { width: summaryWidth - 90 });
+      doc.font('Helvetica-Bold').fillColor('#16a34a');
+      doc.text(`-${parseFloat(kv.kassenanteil).toFixed(2)} €`, summaryX + summaryWidth - 90, sumY, { width: 90, align: 'right' });
     }
-    doc.fontSize(14).text(`Ihr voraussichtlicher Eigenanteil: ${parseFloat(kv.eigenanteil).toFixed(2)} EUR`, { align: 'right' });
 
-    // Footer
-    doc.moveDown(2);
-    doc.fontSize(8).font('Helvetica').fillColor('#666');
-    doc.text('Dieser Kostenvoranschlag ist unverbindlich. Die tatsächlichen Kosten können je nach Behandlungsverlauf abweichen.', 50);
-    doc.text(`KV-Nr.: ${kv.id} | Erstellt: ${new Date(kv.created_at).toLocaleDateString('de-DE')}`);
+    // Eigenanteil highlight
+    sumY += 22;
+    doc.roundedRect(summaryX - 10, sumY - 4, summaryWidth + 10, 28, 4).fill(ACCENT);
+    doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold');
+    doc.text('Ihr Eigenanteil:', summaryX, sumY + 3, { width: summaryWidth - 90 });
+    doc.fontSize(12);
+    doc.text(`${parseFloat(kv.eigenanteil).toFixed(2)} €`, summaryX + summaryWidth - 90, sumY + 1, { width: 90, align: 'right' });
+
+    // ── Footer ──
+    const footerY = 740;
+
+    // Separator
+    doc.moveTo(50, footerY).lineTo(50 + pageWidth, footerY).lineWidth(0.5).strokeColor('#d1d5db').stroke();
+
+    doc.fontSize(7).font('Helvetica').fillColor(GRAY);
+    doc.text(
+      'Dieser Kostenvoranschlag ist unverbindlich und dient der Orientierung. Die tatsächlichen Kosten können je nach Behandlungsverlauf abweichen. Grundlage der Berechnung sind die aktuellen KZVB-Punktwerte.',
+      50, footerY + 8, { width: pageWidth, lineGap: 2 }
+    );
+
+    doc.moveDown(0.5);
+    doc.fontSize(7).fillColor(PRIMARY).font('Helvetica-Bold');
+    doc.text('KFO Praxis Moosburg', 50, doc.y, { continued: true });
+    doc.font('Helvetica').fillColor(GRAY);
+    doc.text('  ·  Stadtplatz 2  ·  85368 Moosburg a.d. Isar  ·  Tel. 08761 7222750  ·  praxis@kfo-moosburg.de');
+
+    if (erstellerName) {
+      doc.moveDown(0.3);
+      doc.text(`Erstellt von: ${erstellerName}`, 50);
+    }
 
     doc.end();
   } catch (err) {

@@ -119,4 +119,37 @@ router.delete('/patienten/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/csv-import/patienten/:id - Patient bearbeiten
+router.put('/patienten/:id', authMiddleware, async (req, res) => {
+  try {
+    const { patient_name, geburtsdatum, versicherungsart, kassenart, telefon, email, notizen } = req.body;
+    if (!patient_name) return res.status(400).json({ error: 'Name ist erforderlich.' });
+    const result = await query(
+      `UPDATE patienten SET patient_name=$1, geburtsdatum=$2, versicherungsart=$3,
+       kassenart=$4, telefon=$5, email=$6, notizen=$7 WHERE id=$8 RETURNING *`,
+      [patient_name, geburtsdatum || null, versicherungsart || 'GKV', kassenart || '', telefon || '', email || '', notizen || '', req.params.id]
+    );
+    if (!result.rows[0]) return res.status(404).json({ error: 'Patient nicht gefunden.' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/csv-import/patienten - Patient manuell anlegen
+router.post('/patienten', authMiddleware, async (req, res) => {
+  try {
+    const { patient_name, geburtsdatum, versicherungsart, kassenart, telefon, email, notizen } = req.body;
+    if (!patient_name) return res.status(400).json({ error: 'Name ist erforderlich.' });
+    const result = await query(
+      `INSERT INTO patienten (patient_name, geburtsdatum, versicherungsart, kassenart, telefon, email, notizen)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [patient_name, geburtsdatum || null, versicherungsart || 'GKV', kassenart || '', telefon || '', email || '', notizen || '']
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export { router as csvImportRouter };

@@ -199,4 +199,37 @@ export const api = {
     if (!res.ok) throw new Error(result.error);
     return result;
   },
+
+  // Patienten
+  async getPatienten() {
+    const res = await request('/api/csv-import/patienten');
+    return res.json();
+  },
+
+  async createPatient(data: Record<string, unknown>) {
+    const res = await request('/api/csv-import/patienten', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  async updatePatient(id: number, data: Record<string, unknown>) {
+    const res = await request(`/api/csv-import/patienten/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  async deletePatient(id: number) {
+    const res = await request(`/api/csv-import/patienten/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
 };

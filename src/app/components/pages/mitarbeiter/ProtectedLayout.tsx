@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/mitarbeiter/kostenvoranschlaege', label: 'Kostenvoranschläge' },
   { href: '/mitarbeiter/kv-erstellen', label: '+ Neuer KV' },
   { href: '/mitarbeiter/leistungen', label: 'BEMA-Leistungen' },
+  { href: '/mitarbeiter/patienten', label: 'Patienten' },
   { href: '/mitarbeiter/punktwerte', label: 'Punktwerte' },
   { href: '/mitarbeiter/csv-import', label: 'CSV Import' },
 ];
