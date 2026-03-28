@@ -4,6 +4,8 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 interface Patient {
   patient_name: string;
+  vorname: string;
+  nachname: string;
   geburtsdatum: string | null;
   versicherungsart: string;
   kassenart: string;
@@ -169,7 +171,7 @@ export function CsvImportPage() {
                   <div key={p.id} className="bg-card border rounded-xl p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-semibold text-foreground">{p.patient_name}</p>
+                        <p className="font-semibold text-foreground">{p.nachname ? `${p.nachname}, ${p.vorname || ''}`.trim() : p.patient_name}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {p.geburtsdatum ? new Date(p.geburtsdatum).toLocaleDateString("de-DE") : "–"} · {p.versicherungsart}
                         </p>
@@ -189,7 +191,8 @@ export function CsvImportPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
-                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Nachname</th>
+                      <th className="px-4 py-3">Vorname</th>
                       <th className="px-4 py-3">Geb.-Datum</th>
                       <th className="px-4 py-3">Versicherung</th>
                       <th className="px-4 py-3">Kassenart</th>
@@ -201,7 +204,8 @@ export function CsvImportPage() {
                   <tbody>
                     {patienten.map((p) => (
                       <tr key={p.id} className="border-b hover:bg-secondary/20">
-                        <td className="px-4 py-3 font-medium">{p.patient_name}</td>
+                        <td className="px-4 py-3 font-medium">{p.nachname || p.patient_name}</td>
+                        <td className="px-4 py-3">{p.vorname || "–"}</td>
                         <td className="px-4 py-3">{p.geburtsdatum ? new Date(p.geburtsdatum).toLocaleDateString("de-DE") : "–"}</td>
                         <td className="px-4 py-3">{p.versicherungsart}</td>
                         <td className="px-4 py-3">{p.kassenart || "–"}</td>
@@ -277,7 +281,7 @@ export function CsvImportPage() {
               <div className="space-y-3 md:hidden">
                 {vorschau.map((p, i) => (
                   <div key={i} className="bg-card border rounded-xl p-4">
-                    <p className="font-semibold text-foreground">{p.patient_name}</p>
+                    <p className="font-semibold text-foreground">{p.nachname ? `${p.nachname}, ${p.vorname || ''}`.trim() : p.patient_name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {p.geburtsdatum || "–"} · {p.versicherungsart} {p.kassenart ? `· ${p.kassenart}` : ""}
                     </p>
@@ -292,7 +296,8 @@ export function CsvImportPage() {
                   <thead>
                     <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
                       <th className="px-4 py-3">#</th>
-                      <th className="px-4 py-3">Name</th>
+                      <th className="px-4 py-3">Nachname</th>
+                      <th className="px-4 py-3">Vorname</th>
                       <th className="px-4 py-3">Geb.-Datum</th>
                       <th className="px-4 py-3">Versicherung</th>
                       <th className="px-4 py-3">Kassenart</th>
@@ -304,7 +309,8 @@ export function CsvImportPage() {
                     {vorschau.map((p, i) => (
                       <tr key={i} className="border-b hover:bg-secondary/20">
                         <td className="px-4 py-3 text-muted-foreground">{i + 1}</td>
-                        <td className="px-4 py-3 font-medium">{p.patient_name}</td>
+                        <td className="px-4 py-3 font-medium">{p.nachname || p.patient_name}</td>
+                        <td className="px-4 py-3">{p.vorname || "–"}</td>
                         <td className="px-4 py-3">{p.geburtsdatum || "–"}</td>
                         <td className="px-4 py-3">{p.versicherungsart}</td>
                         <td className="px-4 py-3">{p.kassenart || "–"}</td>

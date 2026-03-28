@@ -88,6 +88,8 @@ CREATE INDEX IF NOT EXISTS idx_kv_status ON kostenvoranschlaege(status);
 CREATE TABLE IF NOT EXISTS patienten (
   id SERIAL PRIMARY KEY,
   patient_name VARCHAR(255) NOT NULL,
+  vorname VARCHAR(255) DEFAULT '',
+  nachname VARCHAR(255) DEFAULT '',
   geburtsdatum DATE,
   versicherungsart VARCHAR(20) DEFAULT 'GKV',
   kassenart VARCHAR(100),
@@ -98,9 +100,20 @@ CREATE TABLE IF NOT EXISTS patienten (
 );
 `;
 
+// Nachträgliche Spalten hinzufügen (falls Tabelle schon existiert)
+const MIGRATIONS = `
+ALTER TABLE patienten ADD COLUMN IF NOT EXISTS vorname VARCHAR(255) DEFAULT '';
+ALTER TABLE patienten ADD COLUMN IF NOT EXISTS nachname VARCHAR(255) DEFAULT '';
+UPDATE patienten SET
+  vorname = SPLIT_PART(patient_name, ' ', 1),
+  nachname = CASE WHEN POSITION(' ' IN patient_name) > 0 THEN SUBSTRING(patient_name FROM POSITION(' ' IN patient_name) + 1) ELSE '' END
+WHERE vorname = '' AND nachname = '' AND patient_name != '';
+`;
+
 async function migrate() {
   console.log('Running migrations...');
   await query(SQL);
+  await query(MIGRATIONS);
   console.log('Migrations complete.');
 }
 

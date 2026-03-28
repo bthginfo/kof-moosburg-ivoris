@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { api } from "../../../services/api";
+import { SearchableSelect } from "../../ui/SearchableSelect";
 
 interface Leistung {
   id: number;
@@ -17,10 +18,65 @@ interface Position {
   anzahl: number;
 }
 
+interface Patient {
+  id: number;
+  patient_name: string;
+  vorname: string;
+  nachname: string;
+  geburtsdatum: string | null;
+  versicherungsart: string;
+  kassenart: string;
+  telefon: string;
+  email: string;
+}
+
+interface Anfrage {
+  id: number;
+  name: string;
+  email: string;
+  telefon: string;
+  versicherungsart: string;
+  kassenart: string;
+  behandlungsart: string;
+  kig_stufe: string;
+  status: string;
+  created_at: string;
+}
+
+type PatientSource = 'manuell' | 'patient' | 'anfrage' | 'ivoris';
+
+// ── Ivoris Mock-Daten (Demo) ──
+const IVORIS_MOCK_PATIENTS = [
+  { ivoris_id: 'IV-10421', vorname: 'Anna', nachname: 'Berger', geburtsdatum: '2012-05-14', versicherungsart: 'GKV', kassenart: '1', email: 'berger@mail.de', telefon: '08761 1234' },
+  { ivoris_id: 'IV-10422', vorname: 'Lukas', nachname: 'Meier', geburtsdatum: '2009-11-03', versicherungsart: 'GKV', kassenart: '8', email: 'meier.l@web.de', telefon: '08761 5678' },
+  { ivoris_id: 'IV-10423', vorname: 'Sophie', nachname: 'Huber', geburtsdatum: '2014-02-28', versicherungsart: 'PKV', kassenart: '', email: 'huber.s@gmx.de', telefon: '08761 9012' },
+  { ivoris_id: 'IV-10424', vorname: 'Maximilian', nachname: 'Wagner', geburtsdatum: '2008-08-19', versicherungsart: 'GKV', kassenart: '2', email: '', telefon: '08761 3456' },
+  { ivoris_id: 'IV-10425', vorname: 'Emilia', nachname: 'Schmidt', geburtsdatum: '2011-12-01', versicherungsart: 'GKV', kassenart: '1', email: 'schmidt.e@outlook.de', telefon: '' },
+];
+
+const IVORIS_MOCK_TREATMENTS = [
+  { patient_id: 'IV-10421', diagnose: 'Angle-Klasse II/1, Kompression im OK', kig_stufe: '3', behandlungen: ['119a', '119b', '121'] },
+  { patient_id: 'IV-10422', diagnose: 'Distalbiss mit Protrusion der OK-Frontzähne', kig_stufe: '4', behandlungen: ['119a', '119c', '120'] },
+  { patient_id: 'IV-10423', diagnose: 'Kreuzbiss rechts, Engstand UK', kig_stufe: '', behandlungen: ['119a', '119b'] },
+  { patient_id: 'IV-10424', diagnose: 'Offener Biss anterior, KIG 3', kig_stufe: '3', behandlungen: ['119a', '121', '123'] },
+  { patient_id: 'IV-10425', diagnose: 'Angle-Klasse III, Progenie', kig_stufe: '4', behandlungen: ['119a', '119b', '119c', '121'] },
+];
+
 export function KVErstellenPage() {
   const navigate = useNavigate();
   const [leistungen, setLeistungen] = useState<Leistung[]>([]);
   const [positionen, setPositionen] = useState<Position[]>([]);
+  const [patienten, setPatienten] = useState<Patient[]>([]);
+  const [anfragen, setAnfragen] = useState<Anfrage[]>([]);
+
+  // Patient source
+  const [source, setSource] = useState<PatientSource>('manuell');
+  const [selectedPatientId, setSelectedPatientId] = useState<number | null>(null);
+  const [selectedAnfrageId, setSelectedAnfrageId] = useState<number | null>(null);
+  const [selectedIvorisId, setSelectedIvorisId] = useState<string>('');
+  const [ivorisSearch, setIvorisSearch] = useState('');
+  const [ivorisLoading, setIvorisLoading] = useState(false);
+  const [ivorisResults, setIvorisResults] = useState<typeof IVORIS_MOCK_PATIENTS>([]);
 
   const [patientName, setPatientName] = useState("");
   const [geburtsdatum, setGeburtsdatum] = useState("");
@@ -37,12 +93,95 @@ export function KVErstellenPage() {
 
   useEffect(() => {
     api.getLeistungen().then(setLeistungen).catch(() => {});
+    api.getPatienten().then(setPatienten).catch(() => {});
+    api.getAnfragen().then(setAnfragen).catch(() => {});
   }, []);
+
+  // ── Source handlers ──
+  const fillFromPatient = (id: number) => {
+    const p = patienten.find(x => x.id === id);
+    if (!p) return;
+    setSelectedPatientId(id);
+    setPatientName(p.patient_name || `${p.vorname} ${p.nachname}`.trim());
+    setGeburtsdatum(p.geburtsdatum ? p.geburtsdatum.split('T')[0] : '');
+    setVersicherungsart(p.versicherungsart || 'GKV');
+    setKassenart(p.kassenart || '1');
+  };
+
+  const fillFromAnfrage = (id: number) => {
+    const a = anfragen.find(x => x.id === id);
+    if (!a) return;
+    setSelectedAnfrageId(id);
+    setPatientName(a.name);
+    setVersicherungsart(a.versicherungsart || 'GKV');
+    setKassenart(a.kassenart || '1');
+    setKigStufe(a.kig_stufe || '');
+  };
+
+  const searchIvoris = () => {
+    setIvorisLoading(true);
+    // Mock: simulate 800ms API call
+    setTimeout(() => {
+      const q = ivorisSearch.toLowerCase();
+      const results = IVORIS_MOCK_PATIENTS.filter(p =>
+        p.vorname.toLowerCase().includes(q) ||
+        p.nachname.toLowerCase().includes(q) ||
+        p.ivoris_id.toLowerCase().includes(q)
+      );
+      setIvorisResults(results);
+      setIvorisLoading(false);
+    }, 800);
+  };
+
+  const fillFromIvoris = (ivorisId: string) => {
+    const p = IVORIS_MOCK_PATIENTS.find(x => x.ivoris_id === ivorisId);
+    if (!p) return;
+    setSelectedIvorisId(ivorisId);
+    setPatientName(`${p.vorname} ${p.nachname}`);
+    setGeburtsdatum(p.geburtsdatum);
+    setVersicherungsart(p.versicherungsart);
+    setKassenart(p.kassenart || '1');
+
+    // Auto-load treatment data
+    const treatment = IVORIS_MOCK_TREATMENTS.find(t => t.patient_id === ivorisId);
+    if (treatment) {
+      setDiagnose(treatment.diagnose);
+      setKigStufe(treatment.kig_stufe);
+      // Auto-add positions from treatment
+      if (leistungen.length > 0) {
+        const newPositionen: Position[] = [];
+        for (const bema of treatment.behandlungen) {
+          const l = leistungen.find(x => x.bema_nr === bema);
+          if (l) {
+            newPositionen.push({
+              bema_nr: l.bema_nr,
+              bezeichnung: l.bezeichnung,
+              punkte: l.punkte,
+              anzahl: 1,
+            });
+          }
+        }
+        if (newPositionen.length > 0) setPositionen(newPositionen);
+      }
+    }
+  };
+
+  const resetPatientData = () => {
+    setPatientName(''); setGeburtsdatum(''); setVersicherungsart('GKV');
+    setKassenart('1'); setKigStufe(''); setDiagnose('');
+    setSelectedPatientId(null); setSelectedAnfrageId(null);
+    setSelectedIvorisId(''); setIvorisResults([]); setIvorisSearch('');
+    setPositionen([]);
+  };
+
+  const changeSource = (s: PatientSource) => {
+    resetPatientData();
+    setSource(s);
+  };
 
   const addPosition = () => {
     const l = leistungen.find(l => l.bema_nr === selectedBema);
     if (!l) return;
-
     const existing = positionen.findIndex(p => p.bema_nr === selectedBema);
     if (existing >= 0) {
       const updated = [...positionen];
@@ -50,10 +189,7 @@ export function KVErstellenPage() {
       setPositionen(updated);
     } else {
       setPositionen([...positionen, {
-        bema_nr: l.bema_nr,
-        bezeichnung: l.bezeichnung,
-        punkte: l.punkte,
-        anzahl: selectedAnzahl,
+        bema_nr: l.bema_nr, bezeichnung: l.bezeichnung, punkte: l.punkte, anzahl: selectedAnzahl,
       }]);
     }
     setSelectedBema("");
@@ -72,7 +208,7 @@ export function KVErstellenPage() {
     setError("");
     setSaving(true);
     try {
-      const kv = await api.createKV({
+      await api.createKV({
         patient_name: patientName,
         patient_geburtsdatum: geburtsdatum || null,
         versicherungsart,
@@ -81,7 +217,7 @@ export function KVErstellenPage() {
         diagnose: diagnose || null,
         positionen: positionen.map(p => ({ bema_nr: p.bema_nr, anzahl: p.anzahl })),
       });
-      navigate(`/mitarbeiter/kostenvoranschlaege`);
+      navigate('/mitarbeiter/kostenvoranschlaege');
     } catch (err) {
       setError(err instanceof Error ? err.message : "Fehler beim Speichern");
     } finally {
@@ -91,11 +227,147 @@ export function KVErstellenPage() {
 
   const gesamtPunkte = positionen.reduce((sum, p) => sum + p.punkte * p.anzahl, 0);
 
+  const SOURCE_TABS: { key: PatientSource; label: string; icon: string }[] = [
+    { key: 'manuell', label: 'Manuell', icon: '✏️' },
+    { key: 'patient', label: 'Bestandspatient', icon: '👤' },
+    { key: 'anfrage', label: 'Aus Anfrage', icon: '📩' },
+    { key: 'ivoris', label: 'Aus Ivoris', icon: '🦷' },
+  ];
+
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-primary mb-6">Neuen Kostenvoranschlag erstellen</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-6">Neuen Kostenvoranschlag erstellen</h1>
 
-      <div className="bg-card border rounded-xl p-6 mb-6">
+      {/* ── Source Selection ── */}
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
+        <h2 className="font-semibold text-foreground mb-3">Patientendaten-Quelle</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          {SOURCE_TABS.map(tab => (
+            <button key={tab.key} onClick={() => changeSource(tab.key)}
+              className={`p-3 rounded-xl border text-sm font-medium transition-colors text-left ${
+                source === tab.key
+                  ? 'bg-[#063255] text-white border-[#063255]'
+                  : 'bg-card hover:bg-muted/50 text-foreground border-border'
+              }`}>
+              <span className="text-base">{tab.icon}</span>
+              <p className="mt-1">{tab.label}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Source: Patient ── */}
+        {source === 'patient' && (
+          <div className="space-y-3">
+            {patienten.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Noch keine Patienten angelegt. <a href="/mitarbeiter/patienten" className="text-accent hover:underline">Patienten verwalten →</a></p>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Patient auswählen</label>
+                <SearchableSelect
+                  options={patienten.map(p => ({
+                    value: String(p.id),
+                    label: `${p.nachname || ''}${p.vorname ? ', ' + p.vorname : ''} ${p.patient_name && !p.nachname ? p.patient_name : ''}`.trim(),
+                    gruppe: p.versicherungsart,
+                  }))}
+                  value={selectedPatientId ? String(selectedPatientId) : ''}
+                  onChange={(v) => fillFromPatient(Number(v))}
+                  placeholder="Patient suchen..."
+                  searchPlaceholder="Name eingeben..."
+                  emptyText="Kein Patient gefunden."
+                />
+              </div>
+            )}
+            {selectedPatientId && (
+              <div className="bg-[#edf7ff] rounded-xl p-3 text-sm text-[#063255]">
+                Daten von <strong>{patientName}</strong> übernommen.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Source: Anfrage ── */}
+        {source === 'anfrage' && (
+          <div className="space-y-3">
+            {anfragen.length === 0 ? (
+              <p className="text-muted-foreground text-sm">Keine Anfragen vorhanden.</p>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Anfrage auswählen</label>
+                <select value={selectedAnfrageId || ''} onChange={e => fillFromAnfrage(Number(e.target.value))}
+                  className="w-full py-2 px-3 rounded-lg border bg-input-background text-sm">
+                  <option value="">Anfrage wählen...</option>
+                  {anfragen.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} – {a.behandlungsart} ({a.versicherungsart}) – {new Date(a.created_at).toLocaleDateString('de-DE')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {selectedAnfrageId && (
+              <div className="bg-[#edf7ff] rounded-xl p-3 text-sm text-[#063255]">
+                Daten aus Anfrage von <strong>{patientName}</strong> übernommen.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Source: Ivoris ── */}
+        {source === 'ivoris' && (
+          <div className="space-y-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 flex items-start gap-2">
+              <span className="text-base">⚠️</span>
+              <span>
+                <strong>Demo-Modus:</strong> Ivoris-API ist noch nicht angebunden. Es werden Beispieldaten angezeigt. Sobald die API steht, werden hier echte Patientendaten geladen.
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <input value={ivorisSearch} onChange={e => setIvorisSearch(e.target.value)}
+                placeholder="Name oder Ivoris-Nr. eingeben..."
+                onKeyDown={e => e.key === 'Enter' && searchIvoris()}
+                className="flex-1 py-2 px-3 rounded-lg border bg-input-background text-sm" />
+              <button onClick={searchIvoris} disabled={!ivorisSearch || ivorisLoading}
+                className="bg-[#063255] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#063255]/90 disabled:opacity-50 shrink-0">
+                {ivorisLoading ? 'Suche...' : 'Suchen'}
+              </button>
+            </div>
+            {ivorisResults.length > 0 && (
+              <div className="border rounded-xl divide-y max-h-60 overflow-y-auto">
+                {ivorisResults.map(p => (
+                  <button key={p.ivoris_id}
+                    onClick={() => fillFromIvoris(p.ivoris_id)}
+                    className={`w-full text-left p-3 hover:bg-muted/50 transition-colors text-sm ${selectedIvorisId === p.ivoris_id ? 'bg-[#edf7ff]' : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{p.nachname}, {p.vorname}</span>
+                        <span className="text-muted-foreground ml-2">({p.ivoris_id})</span>
+                      </div>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.versicherungsart === 'PKV' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                        {p.versicherungsart}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Geb. {new Date(p.geburtsdatum).toLocaleDateString('de-DE')}
+                      {p.email && ` · ${p.email}`}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+            {ivorisResults.length === 0 && ivorisSearch && !ivorisLoading && (
+              <p className="text-muted-foreground text-sm">Keine Ivoris-Patienten gefunden.</p>
+            )}
+            {selectedIvorisId && (
+              <div className="bg-[#edf7ff] rounded-xl p-3 text-sm text-[#063255]">
+                Daten aus Ivoris für <strong>{patientName}</strong> übernommen (inkl. Diagnose & Positionen).
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Patient Data Form ── */}
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-foreground mb-4">Patientendaten</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -151,11 +423,10 @@ export function KVErstellenPage() {
         </div>
       </div>
 
-      {/* Positionen */}
-      <div className="bg-card border rounded-xl p-6 mb-6">
+      {/* ── Positionen ── */}
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-foreground mb-4">Leistungspositionen</h2>
 
-        {/* Add position */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <select value={selectedBema} onChange={(e) => setSelectedBema(e.target.value)}
             className="flex-1 py-2 px-3 rounded-lg border bg-input-background text-sm">
@@ -180,41 +451,41 @@ export function KVErstellenPage() {
         {positionen.length === 0 ? (
           <p className="text-muted-foreground text-sm">Noch keine Positionen hinzugefügt.</p>
         ) : (
-          <div className="overflow-x-auto -mx-6 px-6">
-          <table className="w-full text-sm min-w-[480px]">
-            <thead>
-              <tr className="border-b text-left text-muted-foreground">
-                <th className="py-2">BEMA</th>
-                <th className="py-2">Bezeichnung</th>
-                <th className="py-2 text-right">Pkt.</th>
-                <th className="py-2 text-right">Anz.</th>
-                <th className="py-2 text-right">Gesamt</th>
-                <th className="py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {positionen.map((p, i) => (
-                <tr key={i} className="border-b border-border/50">
-                  <td className="py-2 font-mono">{p.bema_nr}</td>
-                  <td className="py-2">{p.bezeichnung}</td>
-                  <td className="py-2 text-right">{p.punkte}</td>
-                  <td className="py-2 text-right">{p.anzahl}×</td>
-                  <td className="py-2 text-right font-medium">{p.punkte * p.anzahl}</td>
-                  <td className="py-2 text-right">
-                    <button onClick={() => removePosition(i)}
-                      className="text-destructive hover:underline text-xs">Entfernen</button>
-                  </td>
+          <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+            <table className="w-full text-sm min-w-[480px]">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2">BEMA</th>
+                  <th className="py-2">Bezeichnung</th>
+                  <th className="py-2 text-right">Pkt.</th>
+                  <th className="py-2 text-right">Anz.</th>
+                  <th className="py-2 text-right">Gesamt</th>
+                  <th className="py-2"></th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="font-bold border-t">
-                <td colSpan={4} className="py-2">Gesamt Punkte</td>
-                <td className="py-2 text-right">{gesamtPunkte}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+              </thead>
+              <tbody>
+                {positionen.map((p, i) => (
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="py-2 font-mono">{p.bema_nr}</td>
+                    <td className="py-2">{p.bezeichnung}</td>
+                    <td className="py-2 text-right">{p.punkte}</td>
+                    <td className="py-2 text-right">{p.anzahl}×</td>
+                    <td className="py-2 text-right font-medium">{p.punkte * p.anzahl}</td>
+                    <td className="py-2 text-right">
+                      <button onClick={() => removePosition(i)}
+                        className="text-destructive hover:underline text-xs">Entfernen</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="font-bold border-t">
+                  <td colSpan={4} className="py-2">Gesamt Punkte</td>
+                  <td className="py-2 text-right">{gesamtPunkte}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         )}
       </div>

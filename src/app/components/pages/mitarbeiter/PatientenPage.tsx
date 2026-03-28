@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { api } from "../../../services/api";
+import { SearchableSelect } from "../../ui/SearchableSelect";
 
 interface Patient {
   id: number;
   patient_name: string;
+  vorname: string;
+  nachname: string;
   geburtsdatum: string | null;
   versicherungsart: string;
   kassenart: string;
@@ -13,6 +16,10 @@ interface Patient {
   created_at: string;
 }
 
+interface KassenartenGrouped {
+  [gruppe: string]: { id: string; label: string }[];
+}
+
 export function PatientenPage() {
   const [patienten, setPatienten] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +27,11 @@ export function PatientenPage() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [kassenarten, setKassenarten] = useState<KassenartenGrouped>({});
 
   // Form
-  const [formName, setFormName] = useState("");
+  const [formVorname, setFormVorname] = useState("");
+  const [formNachname, setFormNachname] = useState("");
   const [formGeb, setFormGeb] = useState("");
   const [formVers, setFormVers] = useState("GKV");
   const [formKasse, setFormKasse] = useState("");
@@ -38,12 +47,21 @@ export function PatientenPage() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    api.getKassenarten()
+      .then((data: { grouped: KassenartenGrouped }) => setKassenarten(data.grouped))
+      .catch(() => {});
+  }, []);
+
+  const kassenOptions = Object.entries(kassenarten).flatMap(([gruppe, kassen]) =>
+    kassen.map((k) => ({ value: k.id, label: k.label, gruppe }))
+  );
 
   const resetForm = () => {
     setShowForm(false);
     setEditId(null);
-    setFormName(""); setFormGeb(""); setFormVers("GKV"); setFormKasse("");
+    setFormVorname(""); setFormNachname(""); setFormGeb(""); setFormVers("GKV"); setFormKasse("");
     setFormTel(""); setFormEmail(""); setFormNotizen(""); setError("");
   };
 
@@ -55,7 +73,8 @@ export function PatientenPage() {
   const startEdit = (p: Patient) => {
     setEditId(p.id);
     setShowForm(true);
-    setFormName(p.patient_name);
+    setFormVorname(p.vorname || "");
+    setFormNachname(p.nachname || "");
     setFormGeb(p.geburtsdatum ? p.geburtsdatum.split("T")[0] : "");
     setFormVers(p.versicherungsart);
     setFormKasse(p.kassenart);
@@ -66,11 +85,12 @@ export function PatientenPage() {
   };
 
   const handleSave = async () => {
-    if (!formName.trim()) { setError("Name ist erforderlich."); return; }
+    if (!formNachname.trim() && !formVorname.trim()) { setError("Vor- oder Nachname ist erforderlich."); return; }
     setError("");
     try {
       const data = {
-        patient_name: formName,
+        vorname: formVorname,
+        nachname: formNachname,
         geburtsdatum: formGeb || null,
         versicherungsart: formVers,
         kassenart: formKasse,
@@ -104,6 +124,8 @@ export function PatientenPage() {
     if (!search) return true;
     const s = search.toLowerCase();
     return p.patient_name.toLowerCase().includes(s) ||
+      p.vorname?.toLowerCase().includes(s) ||
+      p.nachname?.toLowerCase().includes(s) ||
       p.email?.toLowerCase().includes(s) ||
       p.telefon?.includes(s) ||
       p.kassenart?.toLowerCase().includes(s);
@@ -144,8 +166,15 @@ export function PatientenPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">Name *</label>
-              <input value={formName} onChange={e => setFormName(e.target.value)}
+              <label className="block text-xs text-muted-foreground mb-1">Vorname *</label>
+              <input value={formVorname} onChange={e => setFormVorname(e.target.value)}
+                placeholder="Max"
+                className="w-full py-2 px-3 rounded-lg border bg-input-background text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Nachname *</label>
+              <input value={formNachname} onChange={e => setFormNachname(e.target.value)}
+                placeholder="Mustermann"
                 className="w-full py-2 px-3 rounded-lg border bg-input-background text-sm" />
             </div>
             <div>
@@ -161,11 +190,16 @@ export function PatientenPage() {
                 <option value="PKV">PKV</option>
               </select>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs text-muted-foreground mb-1">Krankenkasse</label>
-              <input value={formKasse} onChange={e => setFormKasse(e.target.value)}
-                placeholder="z.B. AOK Bayern"
-                className="w-full py-2 px-3 rounded-lg border bg-input-background text-sm" />
+              <SearchableSelect
+                options={kassenOptions}
+                value={formKasse}
+                onChange={v => setFormKasse(v.split("::")[0])}
+                placeholder="Krankenkasse suchen..."
+                searchPlaceholder="z.B. TK, AOK, Barmer..."
+                emptyText="Keine Krankenkasse gefunden."
+              />
             </div>
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Telefon</label>
@@ -206,13 +240,15 @@ export function PatientenPage() {
         <>
           <p className="text-sm text-muted-foreground mb-3">{filtered.length} Patient{filtered.length !== 1 ? 'en' : ''}</p>
 
-          {/* Mobile: Cards */}
+           {/* Mobile: Cards */}
           <div className="space-y-3 md:hidden">
             {filtered.map(p => (
               <div key={p.id} className="bg-card border rounded-xl p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground">{p.patient_name}</p>
+                    <p className="font-semibold text-foreground">
+                      {p.nachname || p.vorname ? `${p.nachname}${p.vorname ? ', ' + p.vorname : ''}` : p.patient_name}
+                    </p>
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-1">
                       {p.geburtsdatum && <span>{new Date(p.geburtsdatum).toLocaleDateString("de-DE")}</span>}
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${p.versicherungsart === 'PKV' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
@@ -238,7 +274,8 @@ export function PatientenPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
-                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Nachname</th>
+                  <th className="px-4 py-3">Vorname</th>
                   <th className="px-4 py-3">Geb.-Datum</th>
                   <th className="px-4 py-3">Versicherung</th>
                   <th className="px-4 py-3">Krankenkasse</th>
@@ -250,7 +287,8 @@ export function PatientenPage() {
               <tbody>
                 {filtered.map(p => (
                   <tr key={p.id} className="border-b hover:bg-secondary/20">
-                    <td className="px-4 py-3 font-medium">{p.patient_name}</td>
+                    <td className="px-4 py-3 font-medium">{p.nachname || p.patient_name}</td>
+                    <td className="px-4 py-3">{p.vorname || "–"}</td>
                     <td className="px-4 py-3">{p.geburtsdatum ? new Date(p.geburtsdatum).toLocaleDateString("de-DE") : "–"}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.versicherungsart === 'PKV' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
