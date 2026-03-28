@@ -18,7 +18,8 @@ const PORT = process.env.PORT || 10000;
 app.use(cors({
   origin: (origin, callback) => {
     const allowed = (process.env.CORS_ORIGIN || 'http://localhost:5173').split(',').map(s => s.trim());
-    if (!origin || allowed.includes(origin)) {
+    // Allow GitHub Codespaces and Vercel preview URLs
+    if (!origin || allowed.includes(origin) || origin.endsWith('.app.github.dev') || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(null, false);
