@@ -200,3 +200,66 @@ kostenvoranschlaegeRouter.patch('/:id/status', async (req, res) => {
     res.status(500).json({ error: 'Serverfehler' });
   }
 });
+
+// PUT /api/kostenvoranschlaege/:id – KV bearbeiten
+kostenvoranschlaegeRouter.put('/:id', async (req, res) => {
+  try {
+    const { patient_name, patient_geburtsdatum, versicherungsart, kassenart,
+      kig_stufe, diagnose, positionen } = req.body;
+
+    if (!patient_name || !versicherungsart || !positionen?.length) {
+      return res.status(400).json({ error: 'Patient, Versicherungsart und Positionen erforderlich' });
+    }
+
+    const kkArt = kassenart || '1';
+    const pwResult = await query(
+      `SELECT quartal, pw_kfo FROM punktwerte
+       WHERE quartal = (SELECT MAX(quartal) FROM punktwerte)
+       AND kassenart = $1 ORDER BY kassengruppe LIMIT 1`,
+      [kkArt]
+    );
+    const punktwert = pwResult.rows[0]?.pw_kfo ? parseFloat(pwResult.rows[0].pw_kfo) : 1.13;
+    const quartal = pwResult.rows[0]?.quartal || 'unbekannt';
+
+    const leistungen = await query('SELECT bema_nr, bezeichnung, punkte FROM leistungen');
+    const lMap = Object.fromEntries(leistungen.rows.map(l => [l.bema_nr, l]));
+
+    let summePunkte = 0;
+    const enrichedPositionen = positionen.map(p => {
+      const l = lMap[p.bema_nr];
+      const punkte = l ? parseFloat(l.punkte) * (p.anzahl || 1) : 0;
+      summePunkte += punkte;
+      return {
+        bema_nr: p.bema_nr,
+        bezeichnung: l?.bezeichnung || p.bezeichnung || '',
+        punkte_einzeln: l ? parseFloat(l.punkte) : 0,
+        anzahl: p.anzahl || 1,
+        punkte_gesamt: punkte,
+        euro: +(punkte * punktwert).toFixed(2),
+      };
+    });
+
+    const summeEuro = +(summePunkte * punktwert).toFixed(2);
+    const kig = parseInt(kig_stufe, 10);
+    const kassenanteilProzent = (versicherungsart === 'GKV' && kig >= 3) ? 80 : 0;
+    const kassenanteil = +(summeEuro * kassenanteilProzent / 100).toFixed(2);
+    const eigenanteil = +(summeEuro - kassenanteil).toFixed(2);
+
+    const result = await query(
+      `UPDATE kostenvoranschlaege SET patient_name=$1, patient_geburtsdatum=$2,
+       versicherungsart=$3, kassenart=$4, kig_stufe=$5, diagnose=$6,
+       positionen=$7, summe_punkte=$8, summe_euro=$9, eigenanteil=$10,
+       kassenanteil=$11, quartal=$12, updated_at=NOW()
+       WHERE id=$13 RETURNING *`,
+      [patient_name, patient_geburtsdatum || null, versicherungsart, kassenart,
+       kig_stufe, diagnose, JSON.stringify(enrichedPositionen), summePunkte, summeEuro,
+       eigenanteil, kassenanteil, quartal, req.params.id]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: 'KV nicht gefunden' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('KV update error:', err);
+    res.status(500).json({ error: 'Serverfehler' });
+  }
+});

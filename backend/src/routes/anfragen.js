@@ -65,3 +65,14 @@ anfragenRouter.patch('/:id/status', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Serverfehler' });
   }
 });
+
+// DELETE /api/anfragen/:id – Anfrage löschen (geschützt)
+anfragenRouter.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+    const result = await query('DELETE FROM anfragen WHERE id = $1 RETURNING id', [req.params.id]);
+    if (!result.rows[0]) return res.status(404).json({ error: 'Anfrage nicht gefunden' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Serverfehler' });
+  }
+});

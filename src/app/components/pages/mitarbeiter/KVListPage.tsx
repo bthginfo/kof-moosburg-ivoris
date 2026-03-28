@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router";
 import { api } from "../../../services/api";
 
 interface KV {
@@ -13,6 +14,8 @@ interface KV {
   created_at: string;
 }
 
+const STATUS_OPTIONS = ['entwurf', 'gesendet', 'angenommen', 'abgelehnt'] as const;
+
 const STATUS_COLORS: Record<string, string> = {
   entwurf: 'bg-yellow-100 text-yellow-700',
   gesendet: 'bg-blue-100 text-blue-700',
@@ -24,12 +27,20 @@ export function KVListPage() {
   const [kvs, setKvs] = useState<KV[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     api.getKVs()
       .then(setKvs)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const changeStatus = async (id: number, status: string) => {
+    await api.updateKVStatus(id, status);
+    load();
+  };
 
   return (
     <div>
@@ -69,16 +80,26 @@ export function KVListPage() {
                   <td className="px-4 py-3 text-right">{parseFloat(String(kv.summe_euro)).toFixed(2)} €</td>
                   <td className="px-4 py-3 text-right font-medium">{parseFloat(String(kv.eigenanteil)).toFixed(2)} €</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[kv.status] || 'bg-gray-100'}`}>
-                      {kv.status}
-                    </span>
+                    <select
+                      value={kv.status}
+                      onChange={(e) => changeStatus(kv.id, e.target.value)}
+                      className={`text-xs px-2 py-1 rounded-full font-medium border-0 cursor-pointer ${STATUS_COLORS[kv.status] || 'bg-gray-100'}`}
+                    >
+                      {STATUS_OPTIONS.map(s => (
+                        <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {new Date(kv.created_at).toLocaleDateString('de-DE')}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 flex gap-2">
+                    <Link to={`/mitarbeiter/kv/${kv.id}`}
+                      className="text-primary hover:underline text-xs">
+                      Details
+                    </Link>
                     <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer"
-                      className="text-accent hover:underline text-xs mr-2">
+                      className="text-accent hover:underline text-xs">
                       PDF
                     </a>
                   </td>

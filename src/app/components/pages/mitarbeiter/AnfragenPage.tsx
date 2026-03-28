@@ -27,6 +27,7 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
 export function AnfragenPage() {
   const [anfragen, setAnfragen] = useState<Anfrage[]>([]);
   const [filter, setFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = () => {
@@ -44,29 +45,52 @@ export function AnfragenPage() {
     load();
   };
 
+  const deleteAnfrage = async (id: number) => {
+    if (!confirm('Anfrage wirklich löschen?')) return;
+    await api.deleteAnfrage(id);
+    load();
+  };
+
+  const filtered = anfragen.filter(a => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return a.name.toLowerCase().includes(s) ||
+      a.email?.toLowerCase().includes(s) ||
+      a.telefon?.includes(s);
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-primary">Anfragen</h1>
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="py-2 px-3 rounded-lg border bg-card text-sm"
-        >
-          <option value="">Alle</option>
-          {Object.entries(STATUS_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v.label}</option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Suche nach Name, Email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="py-2 px-3 rounded-lg border bg-card text-sm w-48"
+          />
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="py-2 px-3 rounded-lg border bg-card text-sm"
+          >
+            <option value="">Alle</option>
+            {Object.entries(STATUS_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
         <p className="text-muted-foreground">Laden...</p>
-      ) : anfragen.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <p className="text-muted-foreground">Keine Anfragen gefunden.</p>
       ) : (
         <div className="space-y-3">
-          {anfragen.map((a) => (
+          {filtered.map((a) => (
             <div key={a.id} className="bg-card border rounded-xl p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
@@ -111,6 +135,10 @@ export function AnfragenPage() {
                       Abschließen
                     </button>
                   )}
+                  <button onClick={() => deleteAnfrage(a.id)}
+                    className="text-xs bg-red-50 text-red-600 px-2 py-1 rounded hover:bg-red-100">
+                    Löschen
+                  </button>
                 </div>
               </div>
             </div>

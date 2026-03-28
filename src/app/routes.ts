@@ -9,7 +9,10 @@ import { DashboardPage } from "./components/pages/mitarbeiter/DashboardPage";
 import { AnfragenPage } from "./components/pages/mitarbeiter/AnfragenPage";
 import { KVListPage } from "./components/pages/mitarbeiter/KVListPage";
 import { KVErstellenPage } from "./components/pages/mitarbeiter/KVErstellenPage";
+import { KVDetailPage } from "./components/pages/mitarbeiter/KVDetailPage";
+import { KVEditPage } from "./components/pages/mitarbeiter/KVEditPage";
 import { PunktwertePage } from "./components/pages/mitarbeiter/PunktwertePage";
+import { LeistungenPage } from "./components/pages/mitarbeiter/LeistungenPage";
 
 export const router = createBrowserRouter([
   {
@@ -34,7 +37,10 @@ export const router = createBrowserRouter([
       { path: "anfragen", Component: AnfragenPage },
       { path: "kostenvoranschlaege", Component: KVListPage },
       { path: "kv-erstellen", Component: KVErstellenPage },
+      { path: "kv/:id", Component: KVDetailPage },
+      { path: "kv/:id/bearbeiten", Component: KVEditPage },
       { path: "punktwerte", Component: PunktwertePage },
+      { path: "leistungen", Component: LeistungenPage },
     ],
   },
 ]);

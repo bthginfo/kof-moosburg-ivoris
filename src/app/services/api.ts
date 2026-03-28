@@ -153,4 +153,50 @@ export const api = {
     });
     return res.json();
   },
+
+  async updateKV(id: number, data: Record<string, unknown>) {
+    const res = await request(`/api/kostenvoranschlaege/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  // Leistungen
+  async updateLeistung(id: number, data: Record<string, unknown>) {
+    const res = await request(`/api/leistungen/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  async createLeistung(data: Record<string, unknown>) {
+    const res = await request('/api/leistungen', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  async deleteLeistung(id: number) {
+    const res = await request(`/api/leistungen/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
+
+  // Anfragen
+  async deleteAnfrage(id: number) {
+    const res = await request(`/api/anfragen/${id}`, { method: 'DELETE' });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
 };
