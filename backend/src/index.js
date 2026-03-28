@@ -47,6 +47,13 @@ cron.schedule('0 8 5 1,4,7,10 *', async () => {
   }
 });
 
+// Keep-alive: Alle 14 Minuten Self-Ping um Render Free-Tier Sleep zu vermeiden
+if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
+  cron.schedule('*/14 * * * *', () => {
+    fetch(`${process.env.RENDER_EXTERNAL_URL}/api/health`).catch(() => {});
+  });
+}
+
 app.listen(PORT, async () => {
   console.log(`KFO Moosburg Backend läuft auf Port ${PORT}`);
   try {
