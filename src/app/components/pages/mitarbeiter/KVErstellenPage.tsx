@@ -118,10 +118,14 @@ export function KVErstellenPage() {
     setKigStufe(a.kig_stufe || '');
   };
 
-  const searchIvoris = () => {
+  // Live-Suche bei jedem Tastendruck
+  useEffect(() => {
+    if (source !== 'ivoris' || !ivorisSearch.trim()) {
+      setIvorisResults([]);
+      return;
+    }
     setIvorisLoading(true);
-    // Mock: simulate 800ms API call
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const q = ivorisSearch.toLowerCase();
       const results = IVORIS_MOCK_PATIENTS.filter(p =>
         p.vorname.toLowerCase().includes(q) ||
@@ -130,8 +134,9 @@ export function KVErstellenPage() {
       );
       setIvorisResults(results);
       setIvorisLoading(false);
-    }, 800);
-  };
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [ivorisSearch, source]);
 
   const fillFromIvoris = (ivorisId: string) => {
     const p = IVORIS_MOCK_PATIENTS.find(x => x.ivoris_id === ivorisId);
@@ -329,15 +334,14 @@ export function KVErstellenPage() {
                 Zum Testen z.B. <strong>IV-10421</strong> oder <strong>Berger</strong> suchen.
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
               <input value={ivorisSearch} onChange={e => setIvorisSearch(e.target.value)}
                 placeholder="Name oder Ivoris-Nr. eingeben..."
-                onKeyDown={e => e.key === 'Enter' && searchIvoris()}
-                className="flex-1 py-2 px-3 rounded-lg border bg-input-background text-sm" />
-              <button onClick={searchIvoris} disabled={!ivorisSearch || ivorisLoading}
-                className="bg-[#063255] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#063255]/90 disabled:opacity-50 shrink-0">
-                {ivorisLoading ? 'Suche...' : 'Suchen'}
-              </button>
+                className="w-full py-2.5 pl-9 pr-3 rounded-xl border bg-input-background text-sm focus:outline-none focus:ring-2 focus:ring-[#063255]/20 focus:border-[#063255]/40 transition-all" />
+              {ivorisLoading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[#063255] border-t-transparent rounded-full animate-spin" />
+              )}
             </div>
             {ivorisResults.length > 0 && (
               <div className="border rounded-xl divide-y max-h-60 overflow-y-auto">
