@@ -30,8 +30,7 @@ export function SearchableSelect({
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
-  // Composite key: "kassenart_id::Label" to uniquely identify each option
-  const selectedOption = options.find((o) => `${o.value}::${o.label}` === value);
+  const selectedOption = options.find((o) => o.value === value);
   const displayLabel = selectedOption?.label;
 
   // Close on outside click
@@ -89,19 +88,18 @@ export function SearchableSelect({
                   className="[&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide"
                 >
                   {opts.map((opt, i) => {
-                    const optKey = `${opt.value}::${opt.label}`;
                     return (
                       <Command.Item
                         key={`${opt.value}-${i}`}
                         value={opt.label}
                         onSelect={() => {
-                          onChange(optKey);
+                          onChange(opt.value);
                           setOpen(false);
                         }}
                         className="px-4 py-2.5 text-sm text-foreground cursor-pointer hover:bg-accent/10 data-[selected=true]:bg-accent/10 flex items-center justify-between"
                       >
                         {opt.label}
-                        {value === optKey && (
+                        {value === opt.value && (
                           <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>

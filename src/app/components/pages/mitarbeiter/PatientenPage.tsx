@@ -195,7 +195,7 @@ export function PatientenPage() {
               <SearchableSelect
                 options={kassenOptions}
                 value={formKasse}
-                onChange={v => setFormKasse(v.split("::")[0])}
+                onChange={v => setFormKasse(v)}
                 placeholder="Krankenkasse suchen..."
                 searchPlaceholder="z.B. TK, AOK, Barmer..."
                 emptyText="Keine Krankenkasse gefunden."

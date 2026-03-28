@@ -318,7 +318,8 @@ export function KVErstellenPage() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800 flex items-start gap-2">
               <span className="text-base">⚠️</span>
               <span>
-                <strong>Demo-Modus:</strong> Ivoris-API ist noch nicht angebunden. Es werden Beispieldaten angezeigt. Sobald die API steht, werden hier echte Patientendaten geladen.
+                <strong>Demo-Modus:</strong> Ivoris-API ist noch nicht angebunden. Es werden Beispieldaten angezeigt.
+                Zum Testen z.B. <strong>IV-10421</strong> oder <strong>Berger</strong> suchen.
               </span>
             </div>
             <div className="flex gap-2">
