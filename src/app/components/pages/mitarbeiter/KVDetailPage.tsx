@@ -153,17 +153,17 @@ export function KVDetailPage() {
             ))}
           </select>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Link to={`/mitarbeiter/kv/${kv.id}/bearbeiten`}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90">
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/90 flex-1 sm:flex-none text-center">
             Bearbeiten
           </Link>
           <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer"
-            className="bg-accent text-accent-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-accent/90">
+            className="bg-accent text-accent-foreground px-4 py-2 rounded-xl text-sm font-medium hover:bg-accent/90 flex-1 sm:flex-none text-center">
             PDF
           </a>
           <button onClick={openSignModal}
-            className="bg-[#063255] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#063255]/90 flex items-center gap-1.5">
+            className="bg-[#063255] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#063255]/90 flex items-center justify-center gap-1.5 w-full sm:w-auto">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
@@ -173,12 +173,12 @@ export function KVDetailPage() {
       </div>
 
       {/* Patient info */}
-      <div className="bg-card border rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Patientendaten</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Patientendaten</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Patient</span>
-            <p className="font-medium">{kv.patient_name}</p>
+            <p className="font-medium break-words">{kv.patient_name}</p>
           </div>
           {kv.patient_geburtsdatum && (
             <div>
@@ -220,16 +220,16 @@ export function KVDetailPage() {
         {kv.diagnose && (
           <div className="mt-4 text-sm">
             <span className="text-muted-foreground">Diagnose</span>
-            <p className="font-medium">{kv.diagnose}</p>
+            <p className="font-medium break-words">{kv.diagnose}</p>
           </div>
         )}
       </div>
 
       {/* Positionen */}
       <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Leistungspositionen</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Leistungspositionen</h2>
         <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
-        <table className="w-full text-sm min-w-[480px]">
+        <table className="w-full text-xs sm:text-sm min-w-[480px]">
           <thead>
             <tr className="border-b text-left text-muted-foreground">
               <th className="py-2">BEMA</th>
@@ -257,8 +257,8 @@ export function KVDetailPage() {
       </div>
 
       {/* Zusammenfassung */}
-      <div className="bg-card border rounded-xl p-6">
-        <h2 className="font-semibold text-foreground mb-3">Zusammenfassung</h2>
+      <div className="bg-card border rounded-xl p-4 sm:p-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Zusammenfassung</h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Gesamtsumme</span>
@@ -288,7 +288,7 @@ export function KVDetailPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-                <h2 className="text-lg font-semibold text-white">Adobe Sign – Zur Unterschrift senden</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-white">Adobe Sign – Zur Unterschrift senden</h2>
               </div>
               <button onClick={closeSignModal} className="text-white/70 hover:text-white text-xl leading-none">&times;</button>
             </div>
@@ -349,7 +349,7 @@ export function KVDetailPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm font-medium text-foreground block mb-1">Erinnerung nach (Tage)</label>
                     <select

@@ -23,6 +23,8 @@ interface KassenartenGrouped {
 export function PatientenPage() {
   const [patienten, setPatienten] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ivorisImporting, setIvorisImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number; total: number } | null>(null);
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -120,6 +122,21 @@ export function PatientenPage() {
     }
   };
 
+  const handleImportAllFromIvorisMock = async () => {
+    setError("");
+    setImportResult(null);
+    setIvorisImporting(true);
+    try {
+      const result = await api.importAllPatientenFromIvorisMock();
+      setImportResult(result);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Import fehlgeschlagen");
+    } finally {
+      setIvorisImporting(false);
+    }
+  };
+
   const filtered = patienten.filter(p => {
     if (!search) return true;
     const s = search.toLowerCase();
@@ -135,17 +152,30 @@ export function PatientenPage() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-primary">Patienten</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <button
+            onClick={handleImportAllFromIvorisMock}
+            disabled={ivorisImporting}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-primary/90 disabled:opacity-50 w-full sm:w-auto"
+          >
+            {ivorisImporting ? "Import läuft..." : "Alle aus Ivoris importieren (Mock)"}
+          </button>
           <a href="/mitarbeiter/csv-import"
-            className="bg-secondary text-secondary-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-secondary/80">
+            className="bg-secondary text-secondary-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-secondary/80 text-center w-full sm:w-auto">
             CSV Import
           </a>
           <button onClick={startNew}
-            className="bg-accent text-accent-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-accent/90">
+            className="bg-accent text-accent-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-accent/90 w-full sm:w-auto">
             + Neuer Patient
           </button>
         </div>
       </div>
+
+      {importResult && (
+        <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm mb-4">
+          Ivoris-Mockimport abgeschlossen: {importResult.imported} importiert, {importResult.skipped} übersprungen, {importResult.total} gesamt.
+        </div>
+      )}
 
       <div className="mb-4">
         <input
@@ -161,7 +191,7 @@ export function PatientenPage() {
 
       {showForm && (
         <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
-          <h2 className="font-semibold text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">
             {editId ? "Patient bearbeiten" : "Neuer Patient"}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">

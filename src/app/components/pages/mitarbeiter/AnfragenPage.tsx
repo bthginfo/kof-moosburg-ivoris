@@ -62,7 +62,7 @@ export function AnfragenPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-        <div><h1 className="text-2xl font-bold text-[#063255]">Anfragen</h1><p className="text-sm text-gray-500 mt-0.5">Patientenanfragen verwalten und bearbeiten</p></div>
+        <div><h1 className="text-xl sm:text-2xl font-bold text-[#063255]">Anfragen</h1><p className="text-sm text-gray-500 mt-0.5">Patientenanfragen verwalten und bearbeiten</p></div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <input
             type="text"
@@ -91,7 +91,7 @@ export function AnfragenPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((a) => (
-            <div key={a.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div key={a.id} className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">

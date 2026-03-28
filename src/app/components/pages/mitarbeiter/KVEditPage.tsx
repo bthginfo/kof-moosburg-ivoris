@@ -113,10 +113,10 @@ export function KVEditPage() {
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-2xl font-bold text-primary mb-6">KV-{id} bearbeiten</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-6">KV-{id} bearbeiten</h1>
 
-      <div className="bg-card border rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-4">Patientendaten</h2>
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Patientendaten</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Patient *</label>
@@ -169,8 +169,8 @@ export function KVEditPage() {
         </div>
       </div>
 
-      <div className="bg-card border rounded-xl p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-4">Leistungspositionen</h2>
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Leistungspositionen</h2>
         <div className="flex gap-2 mb-4">
           <select value={selectedBema} onChange={(e) => setSelectedBema(e.target.value)}
             className="flex-1 py-2 px-3 rounded-lg border bg-input-background text-sm">

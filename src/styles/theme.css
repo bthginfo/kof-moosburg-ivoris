@@ -103,20 +103,20 @@
 
   h1 {
     color: #0d1317;
-    font-size: 4rem;
+    font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 600;
     line-height: 1.2;
   }
 
   h2 {
-    font-size: 3rem;
+    font-size: clamp(1.5rem, 5vw, 3rem);
     font-weight: 600;
     line-height: 1.2;
   }
 
   h3 {
     color: #0d1317;
-    font-size: 2.25rem;
+    font-size: clamp(1.25rem, 4vw, 2.25rem);
     font-weight: 600;
     line-height: 1.2;
   }
@@ -130,7 +130,7 @@
 
   p {
     color: #4a5d69;
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 500;
   }
 
@@ -154,5 +154,20 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      line-height: 1.15;
+    }
+
+    h2 {
+      line-height: 1.2;
+    }
+
+    p {
+      font-size: 0.975rem;
+      line-height: 1.5;
+    }
   }
 }

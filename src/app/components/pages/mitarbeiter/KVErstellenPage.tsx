@@ -245,7 +245,7 @@ export function KVErstellenPage() {
 
       {/* ── Source Selection ── */}
       <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-3">Patientendaten-Quelle</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">Patientendaten-Quelle</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           {SOURCE_TABS.map(tab => (
             <button key={tab.key} onClick={() => changeSource(tab.key)}
@@ -380,7 +380,7 @@ export function KVErstellenPage() {
 
       {/* ── Patient Data Form ── */}
       <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-4">Patientendaten</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Patientendaten</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Patient *</label>
@@ -437,7 +437,7 @@ export function KVErstellenPage() {
 
       {/* ── Positionen ── */}
       <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
-        <h2 className="font-semibold text-foreground mb-4">Leistungspositionen</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Leistungspositionen</h2>
 
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <select value={selectedBema} onChange={(e) => setSelectedBema(e.target.value)}

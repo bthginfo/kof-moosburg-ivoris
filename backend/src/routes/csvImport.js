@@ -101,6 +101,55 @@ router.post('/importieren', authMiddleware, upload.single('file'), async (req, r
   }
 });
 
+// POST /api/csv-import/import-ivoris-mock - Mock-Gesamtimport aller Ivoris-Patienten
+router.post('/import-ivoris-mock', authMiddleware, async (_req, res) => {
+  try {
+    const mockPatienten = [
+      { vorname: 'Max', nachname: 'Mustermann', geburtsdatum: '1991-05-02', versicherungsart: 'GKV', kassenart: 'TK', telefon: '01761234567', email: 'max.mustermann@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Anna', nachname: 'Schneider', geburtsdatum: '2009-11-18', versicherungsart: 'GKV', kassenart: 'AOK Bayern', telefon: '01761234568', email: 'anna.schneider@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Luca', nachname: 'Weber', geburtsdatum: '2007-08-24', versicherungsart: 'PKV', kassenart: 'Debeka', telefon: '01761234569', email: 'luca.weber@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Sophie', nachname: 'Fischer', geburtsdatum: '2010-01-13', versicherungsart: 'GKV', kassenart: 'Barmer', telefon: '01761234570', email: 'sophie.fischer@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Noah', nachname: 'Meyer', geburtsdatum: '2008-06-03', versicherungsart: 'GKV', kassenart: 'DAK', telefon: '01761234571', email: 'noah.meyer@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Leonie', nachname: 'Wagner', geburtsdatum: '2012-04-21', versicherungsart: 'GKV', kassenart: 'IKK classic', telefon: '01761234572', email: 'leonie.wagner@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Paul', nachname: 'Becker', geburtsdatum: '2006-09-30', versicherungsart: 'PKV', kassenart: 'Allianz', telefon: '01761234573', email: 'paul.becker@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Mia', nachname: 'Hoffmann', geburtsdatum: '2011-02-27', versicherungsart: 'GKV', kassenart: 'BKK VerbundPlus', telefon: '01761234574', email: 'mia.hoffmann@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Elias', nachname: 'Schulz', geburtsdatum: '2005-12-15', versicherungsart: 'GKV', kassenart: 'Techniker', telefon: '01761234575', email: 'elias.schulz@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Emilia', nachname: 'Koch', geburtsdatum: '2013-07-09', versicherungsart: 'GKV', kassenart: 'AOK Plus', telefon: '01761234576', email: 'emilia.koch@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Jonas', nachname: 'Richter', geburtsdatum: '2004-10-19', versicherungsart: 'PKV', kassenart: 'HUK-Coburg', telefon: '01761234577', email: 'jonas.richter@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+      { vorname: 'Lina', nachname: 'Klein', geburtsdatum: '2014-03-25', versicherungsart: 'GKV', kassenart: 'SBK', telefon: '01761234578', email: 'lina.klein@example.de', notizen: 'Mock aus Ivoris Gesamtimport' },
+    ];
+
+    let imported = 0;
+    let skipped = 0;
+
+    for (const p of mockPatienten) {
+      const patient_name = [p.vorname, p.nachname].filter(Boolean).join(' ');
+      const existing = await query(
+        'SELECT id FROM patienten WHERE LOWER(patient_name) = LOWER($1) AND geburtsdatum = $2',
+        [patient_name, p.geburtsdatum || null]
+      );
+
+      if (existing.rows.length > 0) {
+        skipped++;
+        continue;
+      }
+
+      await query(
+        `INSERT INTO patienten (patient_name, vorname, nachname, geburtsdatum, versicherungsart, kassenart, telefon, email, notizen)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [patient_name, p.vorname, p.nachname, p.geburtsdatum || null, p.versicherungsart, p.kassenart, p.telefon, p.email, p.notizen]
+      );
+
+      imported++;
+    }
+
+    res.json({ imported, skipped, total: mockPatienten.length, source: 'ivoris-mock' });
+  } catch (err) {
+    console.error('Ivoris Mock Import Fehler:', err);
+    res.status(500).json({ error: 'Mock-Import fehlgeschlagen: ' + err.message });
+  }
+});
+
 // GET /api/csv-import/patienten - Alle importierten Patienten abfragen
 router.get('/patienten', authMiddleware, async (_req, res) => {
   try {

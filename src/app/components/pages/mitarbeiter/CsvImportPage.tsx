@@ -133,7 +133,7 @@ export function CsvImportPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
-        <h1 className="text-2xl font-bold text-primary">CSV Import</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-primary">CSV Import</h1>
         <button
           onClick={showPatienten ? () => setShowPatienten(false) : loadPatienten}
           disabled={patLoading}
@@ -227,8 +227,8 @@ export function CsvImportPage() {
       ) : (
         <div>
           {/* Upload-Bereich */}
-          <div className="bg-card border rounded-xl p-6 mb-6">
-            <h2 className="font-semibold text-foreground mb-2">Patientendaten aus CSV importieren</h2>
+          <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Patientendaten aus CSV importieren</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Exportieren Sie Patientendaten aus Ivoris KFO als CSV-Datei und laden Sie diese hier hoch.
               Unterstützt werden Semikolon- und Komma-getrennte Dateien.
@@ -263,7 +263,7 @@ export function CsvImportPage() {
             <div className="mb-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
                 <div>
-                  <h2 className="font-semibold text-foreground">Vorschau</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-foreground">Vorschau</h2>
                   <p className="text-sm text-muted-foreground">
                     {valid} von {total} Zeilen erkannt · Erkannte Spalten: {headers.join(", ")}
                   </p>

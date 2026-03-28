@@ -47,9 +47,9 @@ export function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         {/* Neue Anfragen */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 w-20 h-20 bg-[#f58a07]/5 rounded-bl-[40px]" />
           <div className="w-10 h-10 rounded-xl bg-[#f58a07]/10 flex items-center justify-center mb-3">
             <svg className="w-5 h-5 text-[#f58a07]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -57,11 +57,11 @@ export function DashboardPage() {
             </svg>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Neue Anfragen</p>
-          <p className="text-3xl font-bold text-[#f58a07] mt-1">{stats.neueAnfragen}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#f58a07] mt-1">{stats.neueAnfragen}</p>
         </div>
 
         {/* Anfragen Gesamt */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 w-20 h-20 bg-[#063255]/5 rounded-bl-[40px]" />
           <div className="w-10 h-10 rounded-xl bg-[#063255]/10 flex items-center justify-center mb-3">
             <svg className="w-5 h-5 text-[#063255]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -69,11 +69,11 @@ export function DashboardPage() {
             </svg>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Anfragen Gesamt</p>
-          <p className="text-3xl font-bold text-[#063255] mt-1">{stats.anfragen}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-[#063255] mt-1">{stats.anfragen}</p>
         </div>
 
         {/* KVs */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 rounded-bl-[40px]" />
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-3">
             <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -81,11 +81,11 @@ export function DashboardPage() {
             </svg>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Kostenvoranschläge</p>
-          <p className="text-3xl font-bold text-emerald-600 mt-1">{stats.kvs}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1">{stats.kvs}</p>
         </div>
 
         {/* Patienten */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-shadow">
           <div className="absolute top-0 right-0 w-20 h-20 bg-violet-500/5 rounded-bl-[40px]" />
           <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center mb-3">
             <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -93,7 +93,7 @@ export function DashboardPage() {
             </svg>
           </div>
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Patienten</p>
-          <p className="text-3xl font-bold text-violet-600 mt-1">{stats.patienten}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-violet-600 mt-1">{stats.patienten}</p>
         </div>
       </div>
 

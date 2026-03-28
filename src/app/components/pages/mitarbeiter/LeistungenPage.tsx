@@ -118,7 +118,7 @@ export function LeistungenPage() {
 
       {(showNew || editId) && (
         <div className="bg-card border rounded-xl p-4 mb-6">
-          <h2 className="font-semibold text-foreground mb-3">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-3">
             {editId ? 'Leistung bearbeiten' : 'Neue Leistung'}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">

@@ -45,9 +45,9 @@ export function KVListPage() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div><h1 className="text-2xl font-bold text-[#063255]">Kostenvoranschläge</h1><p className="text-sm text-gray-500 mt-0.5">Alle erstellten KVs im Überblick</p></div>
+        <div><h1 className="text-xl sm:text-2xl font-bold text-[#063255]">Kostenvoranschläge</h1><p className="text-sm text-gray-500 mt-0.5">Alle erstellten KVs im Überblick</p></div>
         <a href="/mitarbeiter/kv-erstellen"
-          className="inline-flex items-center gap-2 bg-[#f58a07] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#e07d06] transition-colors shadow-sm">
+          className="inline-flex items-center justify-center gap-2 bg-[#f58a07] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#e07d06] transition-colors shadow-sm w-full sm:w-auto">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg> Neuer KV
         </a>
       </div>
@@ -74,14 +74,14 @@ export function KVListPage() {
                     ))}
                   </select>
                 </div>
-                <p className="font-semibold text-foreground">{kv.patient_name}</p>
+                <p className="font-semibold text-foreground break-words">{kv.patient_name}</p>
                 <p className="text-sm text-muted-foreground">{kv.versicherungsart} | {new Date(kv.created_at).toLocaleDateString('de-DE')}</p>
                 <div className="flex items-center justify-between mt-2">
                   <div>
                     <span className="text-xs text-muted-foreground">Eigenanteil: </span>
                     <span className="font-bold text-accent">{parseFloat(String(kv.eigenanteil)).toFixed(2)} €</span>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 shrink-0">
                     <Link to={`/mitarbeiter/kv/${kv.id}`} className="text-primary hover:underline text-sm">Details</Link>
                     <a href={api.getKVPdfUrl(kv.id)} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline text-sm">PDF</a>
                   </div>

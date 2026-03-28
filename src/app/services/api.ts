@@ -232,4 +232,13 @@ export const api = {
     if (!res.ok) throw new Error(result.error);
     return result;
   },
+
+  async importAllPatientenFromIvorisMock() {
+    const res = await request('/api/csv-import/import-ivoris-mock', {
+      method: 'POST',
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error);
+    return result;
+  },
 };
