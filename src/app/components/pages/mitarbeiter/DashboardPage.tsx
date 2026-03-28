@@ -20,7 +20,7 @@ export function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-primary mb-6">
+      <h1 className="text-xl sm:text-2xl font-bold text-primary mb-6">
         Willkommen, {user?.name || 'Mitarbeiter'}
       </h1>
 

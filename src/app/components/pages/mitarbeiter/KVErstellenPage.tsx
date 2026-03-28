@@ -156,7 +156,7 @@ export function KVErstellenPage() {
         <h2 className="font-semibold text-foreground mb-4">Leistungspositionen</h2>
 
         {/* Add position */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <select value={selectedBema} onChange={(e) => setSelectedBema(e.target.value)}
             className="flex-1 py-2 px-3 rounded-lg border bg-input-background text-sm">
             <option value="">BEMA-Position wählen...</option>
@@ -166,19 +166,22 @@ export function KVErstellenPage() {
               </option>
             ))}
           </select>
-          <input type="number" min={1} value={selectedAnzahl}
-            onChange={(e) => setSelectedAnzahl(Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-20 py-2 px-3 rounded-lg border bg-input-background text-sm text-center" />
-          <button onClick={addPosition} disabled={!selectedBema}
-            className="bg-accent text-accent-foreground px-4 py-2 rounded-lg font-medium text-sm disabled:opacity-50 hover:bg-accent/90">
-            Hinzufügen
-          </button>
+          <div className="flex gap-2">
+            <input type="number" min={1} value={selectedAnzahl}
+              onChange={(e) => setSelectedAnzahl(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-20 py-2 px-3 rounded-lg border bg-input-background text-sm text-center" />
+            <button onClick={addPosition} disabled={!selectedBema}
+              className="bg-accent text-accent-foreground px-4 py-2 rounded-lg font-medium text-sm disabled:opacity-50 hover:bg-accent/90">
+              Hinzufügen
+            </button>
+          </div>
         </div>
 
         {positionen.length === 0 ? (
           <p className="text-muted-foreground text-sm">Noch keine Positionen hinzugefügt.</p>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-6 px-6">
+          <table className="w-full text-sm min-w-[480px]">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
                 <th className="py-2">BEMA</th>
@@ -212,6 +215,7 @@ export function KVErstellenPage() {
               </tr>
             </tfoot>
           </table>
+          </div>
         )}
       </div>
 

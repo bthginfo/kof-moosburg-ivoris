@@ -63,13 +63,13 @@ export function AnfragenPage() {
     <div>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-bold text-primary">Anfragen</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <input
             type="text"
             placeholder="Suche nach Name, Email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="py-2 px-3 rounded-lg border bg-card text-sm w-48"
+            className="py-2 px-3 rounded-lg border bg-card text-sm w-full sm:w-48"
           />
           <select
             value={filter}

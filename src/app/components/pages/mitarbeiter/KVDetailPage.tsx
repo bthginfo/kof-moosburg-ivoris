@@ -68,13 +68,13 @@ export function KVDetailPage() {
 
   return (
     <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Link to="/mitarbeiter/kostenvoranschlaege"
             className="text-muted-foreground hover:text-foreground text-sm">
             ← Zurück
           </Link>
-          <h1 className="text-2xl font-bold text-primary">KV-{kv.id}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-primary">KV-{kv.id}</h1>
           <select
             value={kv.status}
             onChange={(e) => changeStatus(e.target.value)}
@@ -151,9 +151,10 @@ export function KVDetailPage() {
       </div>
 
       {/* Positionen */}
-      <div className="bg-card border rounded-xl p-6 mb-6">
+      <div className="bg-card border rounded-xl p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-foreground mb-3">Leistungspositionen</h2>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
+        <table className="w-full text-sm min-w-[480px]">
           <thead>
             <tr className="border-b text-left text-muted-foreground">
               <th className="py-2">BEMA</th>
@@ -177,9 +178,10 @@ export function KVDetailPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
-      {/* Zusammenfassung */}
+      {/* Zusammenfassung */
       <div className="bg-card border rounded-xl p-6">
         <h2 className="font-semibold text-foreground mb-3">Zusammenfassung</h2>
         <div className="space-y-2 text-sm">

@@ -25,7 +25,7 @@ export function ProtectedLayout() {
     <div className="min-h-screen bg-secondary/30">
       {/* Top nav */}
       <header className="bg-primary text-primary-foreground shadow-md">
-        <div className="max-w-7xl mx-auto px-5 py-3 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-3 sm:px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -89,7 +89,7 @@ export function ProtectedLayout() {
           </ul>
         </nav>
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-3 sm:p-4 md:p-6">
           <Outlet />
         </main>
       </div>

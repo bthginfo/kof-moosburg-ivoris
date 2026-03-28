@@ -108,8 +108,8 @@ export function LeistungenPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-primary">BEMA-Leistungen</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-primary">BEMA-Leistungen</h1>
         <button onClick={startNew}
           className="bg-accent text-accent-foreground px-4 py-2 rounded-xl font-medium text-sm hover:bg-accent/90">
           + Neue Leistung
@@ -161,44 +161,77 @@ export function LeistungenPage() {
       {loading ? (
         <p className="text-muted-foreground">Laden...</p>
       ) : (
-        <div className="bg-card border rounded-xl overflow-x-auto">
-          <table className="w-full text-sm min-w-[600px]">
-            <thead>
-              <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
-                <th className="px-4 py-3">BEMA-Nr.</th>
-                <th className="px-4 py-3">Bezeichnung</th>
-                <th className="px-4 py-3 text-right">Punkte</th>
-                <th className="px-4 py-3">Kategorie</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Aktionen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leistungen.map((l) => (
-                <tr key={l.id} className={`border-b hover:bg-secondary/20 ${!l.aktiv ? 'opacity-50' : ''}`}>
-                  <td className="px-4 py-3 font-mono">{l.bema_nr}</td>
-                  <td className="px-4 py-3">{l.bezeichnung}</td>
-                  <td className="px-4 py-3 text-right">{l.punkte}</td>
-                  <td className="px-4 py-3">{l.kategorie}</td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => toggleAktiv(l)}
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${l.aktiv ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {l.aktiv ? 'Aktiv' : 'Inaktiv'}
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button onClick={() => startEdit(l)}
-                        className="text-primary hover:underline text-xs">Bearbeiten</button>
-                      <button onClick={() => handleDelete(l.id)}
-                        className="text-destructive hover:underline text-xs">Löschen</button>
+        <>
+          {/* Mobile: Cards */}
+          <div className="space-y-3 md:hidden">
+            {leistungen.map((l) => (
+              <div key={l.id} className={`bg-card border rounded-xl p-4 ${!l.aktiv ? 'opacity-50' : ''}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-sm font-bold text-primary">{l.bema_nr}</span>
+                      <button onClick={() => toggleAktiv(l)}
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${l.aktiv ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {l.aktiv ? 'Aktiv' : 'Inaktiv'}
+                      </button>
                     </div>
-                  </td>
+                    <p className="text-sm text-foreground truncate">{l.bezeichnung}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span>{l.punkte} Punkte</span>
+                      <span>{l.kategorie}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <button onClick={() => startEdit(l)}
+                      className="text-primary hover:underline text-xs">Bearbeiten</button>
+                    <button onClick={() => handleDelete(l.id)}
+                      className="text-destructive hover:underline text-xs">Löschen</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table */}
+          <div className="hidden md:block bg-card border rounded-xl overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
+                  <th className="px-4 py-3">BEMA-Nr.</th>
+                  <th className="px-4 py-3">Bezeichnung</th>
+                  <th className="px-4 py-3 text-right">Punkte</th>
+                  <th className="px-4 py-3">Kategorie</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Aktionen</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {leistungen.map((l) => (
+                  <tr key={l.id} className={`border-b hover:bg-secondary/20 ${!l.aktiv ? 'opacity-50' : ''}`}>
+                    <td className="px-4 py-3 font-mono">{l.bema_nr}</td>
+                    <td className="px-4 py-3">{l.bezeichnung}</td>
+                    <td className="px-4 py-3 text-right">{l.punkte}</td>
+                    <td className="px-4 py-3">{l.kategorie}</td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => toggleAktiv(l)}
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${l.aktiv ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {l.aktiv ? 'Aktiv' : 'Inaktiv'}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(l)}
+                          className="text-primary hover:underline text-xs">Bearbeiten</button>
+                        <button onClick={() => handleDelete(l.id)}
+                          className="text-destructive hover:underline text-xs">Löschen</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
