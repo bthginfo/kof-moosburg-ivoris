@@ -1,6 +1,6 @@
 databases:
   - name: kfo-moosburg-db
-    plan: free
+    plan: starter
     databaseName: kfo_moosburg
     user: kfo_admin
 
