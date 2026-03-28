@@ -36,7 +36,29 @@ export function Footer() {
             </div>
 
             {/* Right: Links */}
-            <div className="grid grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-3 gap-6 md:gap-8">
+              {/* Schnellzugriff */}
+              <div className="flex flex-col items-start">
+                <div className="text-[#edf7ff]" style={{ fontSize: "1.125rem", fontWeight: 600 }}>
+                  Schnellzugriff
+                </div>
+                <div className="h-3" />
+                <Link
+                  to="/preisrechner"
+                  className="text-[#dceaf5]/70 hover:text-white transition-colors mt-2"
+                  style={{ fontWeight: 400 }}
+                >
+                  Kostenrechner
+                </Link>
+                <Link
+                  to="/mitarbeiter"
+                  className="text-[#dceaf5]/70 hover:text-white transition-colors mt-2"
+                  style={{ fontWeight: 400 }}
+                >
+                  Interner Bereich
+                </Link>
+              </div>
+
               {/* Rechtliches */}
               <div className="flex flex-col items-start">
                 <div className="text-[#edf7ff]" style={{ fontSize: "1.125rem", fontWeight: 600 }}>

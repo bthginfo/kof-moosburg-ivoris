@@ -8,6 +8,7 @@ import { leistungenRouter } from './routes/leistungen.js';
 import { preisrechnerRouter } from './routes/preisrechner.js';
 import { kostenvoranschlaegeRouter } from './routes/kostenvoranschlaege.js';
 import { anfragenRouter } from './routes/anfragen.js';
+import { csvImportRouter } from './routes/csvImport.js';
 import { importPunktwerte } from './services/kzvbImport.js';
 import { migrate } from './db/migrate.js';
 import { seed } from './db/seed.js';
@@ -43,6 +44,7 @@ app.use('/api/punktwerte', punktwerteRouter);
 app.use('/api/leistungen', leistungenRouter);
 app.use('/api/kostenvoranschlaege', kostenvoranschlaegeRouter);
 app.use('/api/anfragen', anfragenRouter);
+app.use('/api/csv-import', csvImportRouter);
 
 // Cron: Import KZVB Punktwerte am 5. des 1. Monats jedes Quartals (Jan, Apr, Jul, Okt)
 cron.schedule('0 8 5 1,4,7,10 *', async () => {

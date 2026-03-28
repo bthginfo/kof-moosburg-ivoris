@@ -161,8 +161,8 @@ export function LeistungenPage() {
       {loading ? (
         <p className="text-muted-foreground">Laden...</p>
       ) : (
-        <div className="bg-card border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-card border rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="border-b bg-secondary/50 text-muted-foreground text-left">
                 <th className="px-4 py-3">BEMA-Nr.</th>

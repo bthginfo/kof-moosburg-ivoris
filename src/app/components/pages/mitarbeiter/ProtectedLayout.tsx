@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/mitarbeiter/kv-erstellen', label: '+ Neuer KV' },
   { href: '/mitarbeiter/leistungen', label: 'BEMA-Leistungen' },
   { href: '/mitarbeiter/punktwerte', label: 'Punktwerte' },
+  { href: '/mitarbeiter/csv-import', label: 'CSV Import' },
 ];
 
 export function ProtectedLayout() {

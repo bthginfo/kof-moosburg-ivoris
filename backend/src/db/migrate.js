@@ -83,6 +83,19 @@ CREATE TABLE IF NOT EXISTS kostenvoranschlaege (
 CREATE INDEX IF NOT EXISTS idx_punktwerte_quartal ON punktwerte(quartal);
 CREATE INDEX IF NOT EXISTS idx_anfragen_status ON anfragen(status);
 CREATE INDEX IF NOT EXISTS idx_kv_status ON kostenvoranschlaege(status);
+
+-- Patienten (CSV-Import aus Ivoris)
+CREATE TABLE IF NOT EXISTS patienten (
+  id SERIAL PRIMARY KEY,
+  patient_name VARCHAR(255) NOT NULL,
+  geburtsdatum DATE,
+  versicherungsart VARCHAR(20) DEFAULT 'GKV',
+  kassenart VARCHAR(100),
+  telefon VARCHAR(100),
+  email VARCHAR(255),
+  notizen TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 `;
 
 async function migrate() {
