@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Seiten die nicht indexiert werden sollen
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://kfo-moosburg.de/sitemap.xml
